@@ -17,7 +17,7 @@
 
 想先试用？下载 [演示 JSON](examples/demo-journals.json)（打开后用下载按钮保存），按第 5 步导入。它仅用于测试，包含故意制造的别名冲突，不代表任何学校的正式等级。
 
-兼容范围：manifest 声明 Zotero **7–10 桌面版**；已在 **Windows / Zotero 10.0.6** 实测。其他系统及 7/8/9 尚未真机验证。网页版、手机端不能安装；插件界面目前为中文。
+兼容范围：manifest 声明 Zotero **7–10 桌面版**；已在 **Windows / Zotero 10.0.6** 实测。其他系统及 7/8/9 尚未真机验证。网页版、手机端不能安装；界面跟随 Zotero 语言：中文环境显示中文，其他语言显示英文；更改 Zotero 语言后重启生效。期刊名称、等级、学院和备注始终保留目录原文。
 
 ## 操作图解
 
@@ -49,6 +49,10 @@
 ### 维护自己的目录
 
 “目录管理”支持搜索期刊、别名、ISSN 或等级。可保存多份学校、学院、年度目录，通过顶部下拉切换；导出文件可以分享给同学院的人。
+
+## 界面语言
+
+同一个安装包同时包含中英文。英文环境中的主要按钮对应为：文献筛选 → Paper filter、目录管理 → Catalogs、使用帮助 → Help、学院等级 → Institutional grade。无需另装英文版本。
 
 ## AI 整理提示词
 
@@ -144,7 +148,7 @@ CSV 用户可参考 [CSV 示例](examples/demo-journals.csv)。Excel 另存为 *
 | 没看到“学院等级”列 | 在文献列表表头上右键勾选；确认插件已启用并选中目录。 |
 | 有期刊却显示“目录未收录” | 先在“目录管理”搜索该刊；检查 JSON 是否遗漏、刊名/别名是否正确、文献 ISSN 是否完整。 |
 | 显示“待确认” | 点击“依据”检查名称、ISSN 和等级冲突，核对官方原件后修改目录并重新导入。 |
-| 下拉菜单仍是旧样式 | 在“工具 → 插件”确认版本为 0.1.4 或更高，关闭旧窗口并重启 Zotero；本版已加入资源版本处理。 |
+| 下拉菜单仍是旧样式 | 在“工具 → 插件”确认版本为 0.1.5 或更高，关闭旧窗口并重启 Zotero；本版已加入资源版本处理。 |
 | 复制提示词失败 | 使用上方中英文纯文本链接复制；不要复制页面文件名或 XMLHttpRequest 对象。 |
 | 如何换电脑或分享 | 导出 JSON，在另一台电脑导入。目录不会随 Zotero 同步。 |
 | 会按论文年份自动选目录吗 | 不会，等级来自当前选择的目录。需要自行切换政策版本。 |
@@ -169,12 +173,12 @@ npm run build
 python scripts/verify_release.py
 ```
 
-安装包在 `dist/your-journal-list-0.1.4.xpi`，同目录生成 SHA-256 和 `updates.json`。真实 Zotero 集成测试使用隔离的临时配置与文献库，不打开你的资料库：
+安装包在 `dist/your-journal-list-0.1.5.xpi`，同目录生成 SHA-256 和 `updates.json`。真实 Zotero 集成测试使用隔离的临时配置与文献库，不打开你的资料库：
 
 ```sh
 python scripts/smoke_zotero.py --zotero "C:/Program Files/Zotero/zotero.exe"
 ```
 
-若 `dist` 中有旧版 `your-journal-list-0.1.3.xpi`，还会测试从旧版发现更新、下载、安装、目录保留和缓存刷新；没有旧包时跳过升级部分。最新实测结果见 [测试报告](docs/test-report.json)。界面预览生成脚本为 `scripts/preview-ui.cjs`，使用可选的 Playwright，不参与插件运行。
+若 `dist` 中有旧版 `your-journal-list-0.1.4.xpi`，还会测试从旧版发现更新、下载、安装、目录保留和缓存刷新；没有旧包时跳过升级部分。支持 `--locale zh-CN` / `--locale en-US` 分别检查中英文环境。最新实测结果见 [中文环境报告](docs/test-report.json) / [英文环境报告](docs/test-report.en.json)。界面预览生成脚本为 `scripts/preview-ui.cjs`，使用可选的 Playwright，不参与插件运行。
 
 MIT License。欢迎通过 [Issues](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/issues) 报告问题；请附 Zotero / 插件版本、复现步骤及脱敏目录片段。

@@ -50,14 +50,21 @@ async function runSmoke() {
       item.setField("ISSN", issn);
       await item.saveTx();
       items.push(item);
-      check(Zotero.ItemTreeManager.getCustomCellData(item, app.columnKey) === expected, "Column result: " + (journal || "missing metadata") + " → " + expected);
+      check(Zotero.ItemTreeManager.getCustomCellData(item, app.columnKey) === app.t(expected), "Column result: " + (journal || "missing metadata") + " → " + expected);
     }
     await win.ZoteroPane.selectItems(items.map(i => i.id));
     await delay(800);
     const dialog = app.openManager(win);
     for (let i = 0; i < 40 && !dialog.JournalListUI?.app; i++) await delay(250);
     const ui = dialog.JournalListUI;
+    result.locale = app.l10n.locale;
     check(ui?.app && dialog.document.getElementById("catalog").options.length === 1, "Manager XHTML and script loaded");
+    if (app.l10n.locale === "en") {
+      check(ui.$("refresh").textContent === "Refresh current list" && dialog.document.documentElement.lang.startsWith("en"), "English labels and document language follow Zotero locale: " + ui.$("refresh").textContent + " lang=" + dialog.document.documentElement.lang);
+      check(ui.$("query").placeholder === "Paper title, journal or catalog alias", "English search placeholder");
+      check(ui.$("status").options[2].textContent === "Needs review", "English match-status menu labels");
+      check(win.document.getElementById("your-journal-list-button").getAttribute("label").startsWith("Journal grades"), "Toolbar localized in English");
+    }
     check(ui.$("refresh").getBoundingClientRect().width > 40 && dialog.innerWidth >= 700, "Manager controls have a rendered layout");
     const { FilePicker } = ChromeUtils.importESModule("chrome://zotero/content/modules/filePicker.mjs");
     const picker = new FilePicker();
@@ -85,7 +92,7 @@ async function runSmoke() {
     ui.showTab("catalogs");
     check(ui.$("panel-papers").hidden && !ui.$("panel-catalogs").hidden, "Tabs separate literature and catalog tasks");
     ui.showTab("help"); check(!ui.$("panel-help").hidden, "Help tab opens"); ui.showTab("papers");
-    check(dialog.document.querySelector("link").href.includes("v=0.1.4") && dialog.location.search.includes("v=0.1.4"), "Dialog and stylesheet use versioned cache keys");
+    check(dialog.document.querySelector("link").href.includes("v=" + __TARGET_VERSION__) && dialog.location.search.includes("v=" + __TARGET_VERSION__), "Dialog and stylesheet use versioned cache keys");
     check(dialog.getComputedStyle(dialog.document.querySelector("h1")).fontSize === "18px", "Current compact stylesheet loaded in Zotero");
     ui.$("status").value = ""; statusDropdown.sync(); ui.renderResults();
     ui.$("grade").value = "A类"; ui.renderResults();
@@ -97,6 +104,10 @@ async function runSmoke() {
     // Exercise preview and commit without automating an operating-system file dialog.
     app.chooseFile = async (_win, save) => save ? __EXPORT_PATH__ : __FIXTURE_PATH__;
     await ui.previewImport();
+    if (app.l10n.locale === "en") {
+      check(ui.$("warnings").textContent.includes("Conflicting identifier") && !ui.$("warnings").textContent.includes("冲突"), "Import conflict warnings translated while catalog values are retained");
+      check(ui.$("import-summary").textContent.startsWith("Read "), "Import counts use English text");
+    }
     check(!ui.$("preview").hidden && ui.$("preview-rows").children.length === 4, "Import preview renders records and warnings");
     ui.$("import-name").value = "Second test catalog";
     await ui.confirmImport();
@@ -153,23 +164,24 @@ async function runSmoke() {
       for (let i = 0; i < 40 && !oldDialog.JournalListUI?.app; i++) await delay(100);
       check(oldDialog.JournalListUI?.app, "Old version loaded with its UI and caches before upgrade");
       const installedOld = await AddonManager.getAddonByID(oldApp.pluginID);
-      check(installedOld.version === "0.1.3", "Upgrade begins from installed v0.1.3");
+      check(installedOld.version === "0.1.4", "Upgrade begins from installed v0.1.4");
       const available = await new Promise((resolve, reject) => {
         let found;
         installedOld.findUpdates({ onUpdateAvailable(_addon, install) { found = install; }, onUpdateFinished(_addon, error) { if (error || !found) reject(new Error("No update discovered: " + error + " URL=" + installedOld.updateURL)); else resolve(found); } }, AddonManager.UPDATE_WHEN_USER_REQUESTED);
       });
-      check(available.version === "0.1.4", "Zotero discovers newer version through JSON update feed");
+      check(available.version === __TARGET_VERSION__, "Zotero discovers newer version through JSON update feed");
       await available.install();
-      for (let i = 0; i < 80 && Zotero.YourJournalList?.version !== "0.1.4"; i++) await delay(100);
+      for (let i = 0; i < 80 && Zotero.YourJournalList?.version !== __TARGET_VERSION__; i++) await delay(100);
       app = Zotero.YourJournalList;
-      check(app.version === "0.1.4" && app.activeCatalog()?.name === "Annotated title regression", "Update downloads and installs XPI while preserving catalogs");
+      check(app.version === __TARGET_VERSION__ && app.activeCatalog()?.name === "Annotated title regression", "Update downloads and installs XPI while preserving catalogs");
       check(oldDialog.closed, "Upgrade closes the old UI");
       const upgradedDialog = app.openManager(win);
       for (let i = 0; i < 40 && !upgradedDialog.JournalListUI?.app; i++) await delay(100);
       const upgradedUI = upgradedDialog.JournalListUI;
       check(upgradedUI?.dropdowns.get("grade").control?.localName === "menulist", "Warm upgrade replaces cached custom menu with native control");
       check(upgradedDialog.getComputedStyle(upgradedDialog.document.querySelector("h1")).fontSize === "18px", "Warm upgrade loads new stylesheet without clearing caches");
-      result.update = "v0.1.3 to v0.1.4 through local HTTP feed with SHA-256; GitHub production feed requires a published stable release";
+      if (app.l10n.locale === "en") check(upgradedUI.$("refresh").textContent === "Refresh current list", "Upgrade loads English interface over the Chinese-only previous version");
+      result.update = "v0.1.4 to current version through local HTTP feed with SHA-256; GitHub production feed requires a published stable release";
     }
     result.ok = true;
   }

@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--zotero', default='C:/Program Files/Zotero/zotero.exe')
+    parser.add_argument('--locale', default='zh-CN')
     args = parser.parse_args()
     if not Path(args.zotero).is_file():
         raise SystemExit('Use --zotero to specify your Zotero executable')
@@ -41,6 +42,7 @@ def main():
         'extensions.zotero.automaticScraperUpdates': False,
         'extensions.zotero.sync.autoSync': False,
         'extensions.logging.enabled': True,
+        'intl.locale.requested': args.locale,
         'extensions.checkUpdateSecurity': False,  # Localhost update transport in disposable profile only
         'browser.dom.window.dump.enabled': True,
         'devtools.console.stdout.chrome': True,
@@ -54,6 +56,7 @@ def main():
     }
     (profile / 'prefs.js').write_text('\n'.join(f'user_pref({json.dumps(k)}, {json.dumps(v)});' for k, v in prefs.items()), encoding='utf-8')
     source = (ROOT / 'tests/zotero-smoke.js').read_text(encoding='utf-8')
+    source = source.replace('__TARGET_VERSION__', json.dumps(json.loads((ROOT / 'addon/manifest.json').read_text(encoding='utf-8'))['version']))
     source = source.replace('__RESULT_PATH__', json.dumps(str(profile / 'result.json')))
     source = source.replace('__FIXTURE_PATH__', json.dumps(str(ROOT / 'examples/demo-journals.json')))
     source = source.replace('__EXPORT_PATH__', json.dumps(str(profile / 'export.json')))
@@ -64,7 +67,7 @@ def main():
                 if file.is_file():
                     archive.write(file, file.relative_to(source_dir).as_posix())
     # Local update feed is confined to this disposable test profile.
-    old_package = ROOT / 'dist/your-journal-list-0.1.3.xpi'
+    old_package = ROOT / 'dist/your-journal-list-0.1.4.xpi'
     class QuietHandler(SimpleHTTPRequestHandler):
         def log_message(self, *args):
             pass

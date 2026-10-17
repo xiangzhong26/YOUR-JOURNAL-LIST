@@ -52,7 +52,7 @@
     "Annotated/multi-subject column regression: Management Science",
     "QJE with leading The matches the catalog without ISSN",
     "Old version loaded with its UI and caches before upgrade",
-    "Upgrade begins from installed v0.1.3",
+    "Upgrade begins from installed v0.1.4",
     "Zotero discovers newer version through JSON update feed",
     "Update downloads and installs XPI while preserving catalogs",
     "Upgrade closes the old UI",
@@ -61,6 +61,7 @@
   ],
   "version": "10.0.6",
   "error": "",
+  "locale": "zh-CN",
   "persistence": "Catalog restored after actual add-on disable/enable",
-  "update": "v0.1.3 to v0.1.4 through local HTTP feed with SHA-256; GitHub production feed requires a published stable release"
+  "update": "v0.1.4 to current version through local HTTP feed with SHA-256; GitHub production feed requires a published stable release"
 }

@@ -9,12 +9,12 @@
 
 截至 2026-10-17，[Zotero 官方说明](https://www.zotero.org/support/plugins)表示尚未提供插件目录，官方目录仍在计划中。官方建议在 [Zotero Forums](https://forums.zotero.org/) 介绍和讨论插件。因此目前没有官方商店上传、审核、上架的入口，也无需 Firefox 商店签名。
 
-## 第一次发布 v0.1.4
+## 第一次发布 v0.1.5
 
-先在 Zotero 安装本地 `dist/your-journal-list-0.1.4.xpi`，确认导入、等级列、原生下拉和筛选正常。下列操作由仓库维护者执行：
+先在 Zotero 安装本地 `dist/your-journal-list-0.1.5.xpi`，确认导入、等级列、原生下拉和筛选正常。下列操作由仓库维护者执行：
 
 1. 在 GitHub 仓库的 **Actions** 页面确认工作流已启用。仓库需要允许 Actions 创建 Release（本项目工作流已声明 `contents: write`）。
-2. 确认 `package.json` 与 `addon/manifest.json` 中的版本一致。本次为 `0.1.4`。
+2. 确认 `package.json` 与 `addon/manifest.json` 中的版本一致。本次为 `0.1.5`。
 3. 完成验证并推送版本标签：
 
    ```sh
@@ -23,8 +23,8 @@
    npm run build
    python scripts/verify_release.py
    git push origin master
-   git tag v0.1.4
-   git push origin v0.1.4
+   git tag v0.1.5
+   git push origin v0.1.5
    ```
 
 4. 打开 **Actions → Release plugin**。工作流测试、构建，然后创建 **Draft Release**；不会直接公开发布。
@@ -32,26 +32,26 @@
 
    | 文件 | 用途 |
    | --- | --- |
-   | `your-journal-list-0.1.4.xpi` | 用户安装包 |
-   | `your-journal-list-0.1.4.xpi.sha256` | 安装包校验 |
+   | `your-journal-list-0.1.5.xpi` | 用户安装包 |
+   | `your-journal-list-0.1.5.xpi.sha256` | 安装包校验 |
    | `updates.json` | Zotero 更新清单 |
 
-6. 写明功能、兼容范围、已知限制和测试环境。**不要勾选 pre-release**，设为最新正式版本，再点击 **Publish release**。
+6. 可直接复制 [已准备的中英文发布说明](releases/v0.1.5.md)，也可自行写明功能、兼容范围、已知限制和测试环境。**不要勾选 pre-release**，设为最新正式版本，再点击 **Publish release**。
 7. “Verify published update feed”工作流会访问公开下载地址，检查版本、插件 ID、兼容信息和实际 XPI 的 SHA-256。也可在本地运行：
 
    ```sh
-   python scripts/verify_release.py --live --expect-version 0.1.4
+   python scripts/verify_release.py --live --expect-version 0.1.5
    ```
 
-若 Actions 无法创建草稿，也可在 GitHub **Releases → Draft a new release** 手动选择 `v0.1.4` 标签，把本地构建生成的上述 3 个文件一并上传，再发布正式版本。不要上传源码 ZIP 代替 XPI。
+若 Actions 无法创建草稿，也可在 GitHub **Releases → Draft a new release** 手动选择 `v0.1.5` 标签，把本地构建生成的上述 3 个文件一并上传，再发布正式版本。不要上传源码 ZIP 代替 XPI。
 
 **本次代码修改和推送不等于正式发布。** 在第一个正式 Release 发布前，自动更新地址返回 404 是预期状态。
 
 ## 以后怎样发布更新
 
-1. 修改代码，同时递增 `package.json` 与 `addon/manifest.json` 的版本，例如 `0.1.5`。同步界面资源 URL 中的版本，便于直接加载源码测试；构建时也会自动写入当前版本的缓存键。
+1. 修改代码，同时递增 `package.json` 与 `addon/manifest.json` 的版本，例如 `0.1.6`。同步界面资源 URL 中的版本，便于直接加载源码测试；构建时也会自动写入当前版本的缓存键。
 2. 运行检查、单元测试、构建和发布资产校验，安装新 XPI 验证。
-3. 提交、推送，再创建并推送新标签 `v0.1.5`。不要覆盖已有版本标签或用同一版本替换不同内容的安装包。
+3. 提交、推送，再创建并推送新标签 `v0.1.6`。不要覆盖已有版本标签或用同一版本替换不同内容的安装包。
 4. 检查自动生成的草稿，发布为最新正式版本。不要只上传 XPI 而忘记 `updates.json`。
 
 ## GitHub 自动更新如何工作
@@ -68,7 +68,7 @@ https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases/latest/download/updat
 
 正式更新成立的条件：仓库和 Release 公开；新版本比已安装版本高；正式 Release 被设为最新版本；3 个资产完整且相互一致；用户可以访问 GitHub 及其下载域名。Draft、pre-release、只推送代码、只创建标签都不能替代正式 Release。
 
-**验证范围：** 已在隔离 Zotero 10.0.6 中，从 v0.1.3 的测试副本通过本地 HTTP 更新清单完成发现、下载、SHA-256 校验和 v0.1.4 安装，并保留目录、刷新旧缓存。测试副本仅将旧包的更新源改为 localhost，临时配置允许 HTTP；正式安装包仍使用 HTTPS。GitHub 公开链路需发布后运行 `--live` 验证，当前不宣称已上线。
+**验证范围：** 已在隔离 Zotero 10.0.6 中，从 v0.1.4 的测试副本通过本地 HTTP 更新清单完成发现、下载、SHA-256 校验和 v0.1.5 安装，并保留目录、刷新旧缓存。测试副本仅将旧包的更新源改为 localhost，临时配置允许 HTTP；正式安装包仍使用 HTTPS。GitHub 公开链路需发布后运行 `--live` 验证，当前不宣称已上线。
 
 ### 更新异常排查
 

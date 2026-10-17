@@ -7,7 +7,7 @@ class JournalListDropdown {
     if (!doc.createXULElement) return;
     this.control = doc.createXULElement("menulist");
     this.control.classList.add("native-select");
-    this.control.setAttribute("aria-label", ({ catalog: "当前目录", grade: "等级", status: "匹配状态", "import-mode": "导入方式" })[select.id]);
+    this.control.setAttribute("aria-label", select.getAttribute("aria-label") || select.id);
     this.popup = doc.createXULElement("menupopup");
     this.control.appendChild(this.popup);
     select.after(this.control);

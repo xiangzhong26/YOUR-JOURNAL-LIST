@@ -10,6 +10,7 @@ function setup(saved, writeError = false) {
   let serial = 0, writes = 0, disk = saved;
   const context = vm.createContext({
     JournalListCore: core,
+    JournalListI18n: structuredCloneLocalization(),
     Services: { uuid: { generateUUID: () => `{id-${++serial}}` } },
     PathUtils: { join: (...args) => args.join('/'), parent: value => value.slice(0, value.lastIndexOf('/')) },
     IOUtils: {
@@ -22,13 +23,19 @@ function setup(saved, writeError = false) {
       }
     },
     Zotero: {
-      DataDirectory: { dir: '/isolated-data' }, logError: () => {},
+      locale: 'zh-CN', DataDirectory: { dir: '/isolated-data' }, logError: () => {},
       ItemTreeManager: { registerColumn: () => 'test-column', refreshColumns: () => {}, unregisterColumn: () => {} },
       Notifier: { registerObserver: () => 1, unregisterObserver: () => {} }
     }
   });
   vm.runInContext(source, context);
+  context.JournalListApp.l10n = context.JournalListI18n.use("zh-CN");
   return { app: context.JournalListApp, context, writes: () => writes, disk: () => disk };
+}
+function structuredCloneLocalization() {
+  const context = vm.createContext({});
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../addon/content/i18n.js'), 'utf8'), context);
+  return context.JournalListI18n;
 }
 const catalog = name => ({ name, journals: [{ title: 'Example', grade: 'A' }] });
 

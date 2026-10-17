@@ -8,16 +8,17 @@ var JournalListApp = {
   loadError: "",
 
   async start(pluginID, version = "dev") {
+    this.l10n = JournalListI18n.use(Zotero.locale || Services.locale?.appLocaleAsBCP47 || "en");
     this.version = version;
     this.pluginID = pluginID;
     this.path = PathUtils.join(Zotero.DataDirectory.dir, "your-journal-list", "catalogs.json");
     if (await IOUtils.exists(this.path)) {
       try {
         const saved = await IOUtils.readJSON(this.path);
-        if (saved.schemaVersion !== 1 || !Array.isArray(saved.catalogs)) throw new Error("目录存储格式无效");
+        if (saved.schemaVersion !== 1 || !Array.isArray(saved.catalogs)) throw new Error(this.t("目录存储格式无效"));
         const ids = new Set();
         for (const cat of saved.catalogs) {
-          if (typeof cat.id !== "string" || !cat.id || ids.has(cat.id)) throw new Error("目录 ID 无效或重复");
+          if (typeof cat.id !== "string" || !cat.id || ids.has(cat.id)) throw new Error(this.t("目录 ID 无效或重复"));
           ids.add(cat.id);
           JournalListCore.validateCatalog(cat);
         }
@@ -25,22 +26,24 @@ var JournalListApp = {
         if (!ids.has(saved.activeId)) this.state.activeId = saved.catalogs[0]?.id || "";
       }
       catch (error) {
-        this.loadError = `无法读取本地目录：${error.message}。原文件已保留，请先备份 ${this.path} 后修复。`;
+        this.loadError = this.t("无法读取本地目录：{error}。原文件已保留，请先备份 {path} 后修复。", {error: this.l10n.diagnostic(error.message), path: this.path});
         Zotero.logError(error);
       }
     }
     this.reindex();
     this.columnKey = await Zotero.ItemTreeManager.registerColumn({
-      dataKey: "institutionGrade", label: "学院等级", pluginID,
+      dataKey: "institutionGrade", label: this.t("学院等级"), pluginID,
       enabledTreeIDs: ["*"], width: "125", flex: 0,
-      dataProvider: item => this.itemEligible(item) ? JournalListCore.displayMatch(this.match(item)) : ""
+      dataProvider: item => this.itemEligible(item) ? this.displayMatch(this.match(item)) : ""
     });
-    if (!this.columnKey) throw new Error("无法注册学院等级列");
+    if (!this.columnKey) throw new Error(this.t("无法注册学院等级列"));
     this.notifier = Zotero.Notifier.registerObserver({
       notify: () => this.broadcast("items")
     }, ["item"], "your-journal-list");
   },
 
+  t(source, values) { return this.l10n.t(source, values); },
+  displayMatch(result) { return result.status === "matched" ? result.grade : this.t(JournalListCore.displayMatch(result)); },
   activeCatalog() { return this.state.catalogs.find(c => c.id === this.state.activeId); },
   reindex() { this.index = this.activeCatalog() ? JournalListCore.buildIndex(this.activeCatalog()) : null; },
   itemEligible(item) { return item?.isRegularItem?.() && item.itemType === "journalArticle" && !item.deleted; },
@@ -72,7 +75,7 @@ var JournalListApp = {
       const record = { ...validated, id, importedAt: new Date().toISOString() };
       if (replaceId) {
         const pos = next.catalogs.findIndex(c => c.id === replaceId);
-        if (pos < 0) throw new Error("要替换的目录不存在，请重新选择。");
+        if (pos < 0) throw new Error(this.t("要替换的目录不存在，请重新选择。"));
         next.catalogs[pos] = record;
       }
       else next.catalogs.push(record);
@@ -81,7 +84,7 @@ var JournalListApp = {
   },
   async activate(id) {
     return this.mutate(next => {
-      if (!next.catalogs.some(c => c.id === id)) throw new Error("目录不存在。");
+      if (!next.catalogs.some(c => c.id === id)) throw new Error(this.t("目录不存在。"));
       next.activeId = id;
     });
   },
@@ -98,8 +101,8 @@ var JournalListApp = {
     }
     for (const [win, nodes] of this.windows) {
       const cat = this.activeCatalog();
-      nodes.button?.setAttribute("label", cat ? `学院等级 · ${cat.name}` : "学院等级 · 导入目录");
-      nodes.button?.setAttribute("tooltiptext", cat ? `${cat.institution} ${cat.department} ${cat.version}` : "导入自己的学院期刊目录");
+      nodes.button?.setAttribute("label", cat ? this.t("学院等级 · {name}", {name: cat.name}) : this.t("学院等级 · 导入目录"));
+      nodes.button?.setAttribute("tooltiptext", cat ? `${cat.institution} ${cat.department} ${cat.version}` : this.t("导入自己的学院期刊目录"));
     }
   },
   attachWindow(win) {
@@ -112,7 +115,7 @@ var JournalListApp = {
         menuID: "your-journal-list-manager", pluginID: this.pluginID, target: "main/menubar/tools",
         menus: [{ menuType: "menuitem", onShowing: (_event, context) => {
           // setAttribute is needed for the XUL menu label on Zotero 7/8/10.
-          context.menuElem?.setAttribute("label", "学院期刊目录 / Your Journal List");
+          context.menuElem?.setAttribute("label", this.t("学院期刊目录 / Your Journal List"));
         }, onCommand: () => this.openManager(Zotero.getMainWindow()) }]
       });
     }
@@ -121,7 +124,7 @@ var JournalListApp = {
     if (toolbar) {
       const button = doc.createXULElement("toolbarbutton");
       button.id = "your-journal-list-button";
-      button.setAttribute("label", "学院等级 · 导入目录");
+      button.setAttribute("label", this.t("学院等级 · 导入目录"));
       button.setAttribute("style", "padding: 3px 8px; margin-inline: 4px;");
       button.addEventListener("command", () => this.openManager(win));
       toolbar.appendChild(button);
@@ -132,7 +135,7 @@ var JournalListApp = {
       if (menu) {
         const entry = doc.createXULElement("menuitem");
         entry.id = "your-journal-list-menu";
-        entry.setAttribute("label", "学院期刊目录 / Your Journal List");
+        entry.setAttribute("label", this.t("学院期刊目录 / Your Journal List"));
         entry.addEventListener("command", () => this.openManager(win));
         menu.appendChild(entry);
         nodes.menu = entry;
@@ -162,7 +165,7 @@ var JournalListApp = {
   async chooseFile(win, save = false) {
     const { FilePicker } = ChromeUtils.importESModule("chrome://zotero/content/modules/filePicker.mjs");
     const picker = new FilePicker();
-    picker.init(win, save ? "导出期刊目录" : "选择期刊目录（JSON / CSV）", save ? picker.modeSave : picker.modeOpen);
+    picker.init(win, save ? this.t("导出期刊目录") : this.t("选择期刊目录（JSON / CSV）"), save ? picker.modeSave : picker.modeOpen);
     picker.appendFilter(save ? "JSON" : "JSON / CSV", save ? "*.json" : "*.json; *.csv");
     if (save) { picker.defaultString = "journal-list.json"; picker.defaultExtension = "json"; }
     const result = await picker.show();
@@ -170,12 +173,12 @@ var JournalListApp = {
   },
   async readImport(path) {
     const info = await IOUtils.stat(path);
-    if (info.size > JournalListCore.MAX_BYTES) throw new Error("文件超过 10 MB，请拆分后导入。");
+    if (info.size > JournalListCore.MAX_BYTES) throw new Error(this.t("文件超过 10 MB，请拆分后导入。"));
     return JournalListCore.parseCatalog(await IOUtils.readUTF8(path), PathUtils.filename(path));
   },
   async exportCatalog(win) {
     const catalog = this.activeCatalog();
-    if (!catalog) throw new Error("请先选择目录。");
+    if (!catalog) throw new Error(this.t("请先选择目录。"));
     const path = await this.chooseFile(win, true);
     if (!path) return false;
     const { id, importedAt, ...exported } = catalog;
@@ -186,7 +189,7 @@ var JournalListApp = {
     const filename = language === "en" ? "ai-prompt-en.txt" : "ai-prompt.txt";
     const response = await Zotero.HTTP.request("GET", `chrome://yourjournallist/content/${filename}`, { responseType: "text" });
     const prompt = response.responseText;
-    if (typeof prompt !== "string" || !prompt.trim()) throw new Error("提示词文件未返回有效文本，请重新安装插件后再试。");
+    if (typeof prompt !== "string" || !prompt.trim()) throw new Error(this.t("提示词文件未返回有效文本，请重新安装插件后再试。"));
     return prompt;
   },
   async copyPrompt(language = "zh-CN") {

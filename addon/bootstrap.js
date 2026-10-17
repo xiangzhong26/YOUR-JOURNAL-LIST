@@ -10,6 +10,7 @@ async function startup({ id, rootURI, version }) {
     ["content", "yourjournallist", "content/"]
   ]);
   journalScope = { Zotero, Services, ChromeUtils, IOUtils, PathUtils, Cc, Ci };
+  Services.scriptloader.loadSubScriptWithOptions(rootURI + "content/i18n.js", { target: journalScope, charset: "UTF-8", ignoreCache: true });
   Services.scriptloader.loadSubScriptWithOptions(rootURI + "content/core.js", { target: journalScope, charset: "UTF-8", ignoreCache: true });
   Services.scriptloader.loadSubScriptWithOptions(rootURI + "content/app.js", { target: journalScope, charset: "UTF-8", ignoreCache: true });
   Zotero.YourJournalList = journalScope.JournalListApp;

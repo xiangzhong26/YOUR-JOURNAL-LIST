@@ -10,14 +10,14 @@ No AI key or server required. Use your preferred AI to prepare the catalog once;
 
 1. Download the `.xpi` under **Assets** on [Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases). Source code ZIP is not an installable plugin. If no release exists yet, build it using the development commands below.
 2. In Zotero, open **Tools → Plugins** and drag the `.xpi` onto the window, or use **Install Plugin From File…** in the gear menu. Installing a newer version preserves imported catalogs.
-3. Open **Tools → 学院期刊目录 / Your Journal List**, or use the **学院等级** button above the item list.
-4. Open **使用帮助** (Help) and click **Copy English prompt**. Give your AI both the prompt and the official school/department document. Save its output as `journal-list.json`.
-5. Open **目录管理 → 导入目录…** (Catalogs → Import), select the file, review the preview, and click **确认并启用** (Confirm and activate).
-6. Right-click the Zotero item-list column header and enable **学院等级** (Institutional grade). Choose a collection and use the plugin's **文献筛选** (Paper filter) tab.
+3. Open **Tools → Your Journal List**, or use the **Journal grades** button above the item list.
+4. Open **Help** and click **Copy English prompt**. Give your AI both the prompt and the official school/department document. Save its output as `journal-list.json`.
+5. Open **Catalogs → Import catalog…**, select the file, review the preview, and click **Import and activate**.
+6. Right-click the Zotero item-list column header and enable **Institutional grade**. Choose a collection and use the plugin's **Paper filter** tab.
 
 For a quick trial, download and import [demo JSON](examples/demo-journals.json). It includes intentional alias conflicts for testing and does not represent a real institution's policy.
 
-Manifest compatibility: **Zotero 7–10 desktop**. Tested on **Windows / Zotero 10.0.6**; other versions and macOS/Linux have not been tested on devices. Web and mobile Zotero cannot install this plugin. The interface currently uses Chinese; this guide retains the actual button labels.
+Manifest compatibility: **Zotero 7–10 desktop**. Tested on **Windows / Zotero 10.0.6**; other versions and macOS/Linux have not been tested on devices. Web and mobile Zotero cannot install this plugin. The interface follows Zotero’s language: Chinese for Chinese locales, English otherwise. Restart Zotero after changing its language. Journal titles, institutional grades and notes retain their original wording.
 
 ## Illustrated guide
 
@@ -25,30 +25,30 @@ These are **browser-rendered previews of the current interface source**, with fi
 
 ### Import a catalog
 
-Under **目录管理**, click **导入目录…** and choose JSON or CSV UTF-8. PDF, Word and Excel must first be converted using the prompt; the plugin does not import them directly.
+Under **Catalogs**, click **Import catalog…** and choose JSON or CSV UTF-8. PDF, Word and Excel must first be converted using the prompt; the plugin does not import them directly.
 
-![Catalog management: import, export, delete and search](docs/images/ui-catalogs.png)
+![Catalog management: import, export, delete and search](docs/images/ui-catalogs-en.png)
 
-Check the school, department, version, number of journals and validation warnings. The default import mode adds another catalog. Choose **替换：…** to replace an existing one; export a backup first if needed.
+Check the school, department, version, number of journals and validation warnings. The default import mode adds another catalog. Choose **Replace: …** to replace an existing one; export a backup first if needed.
 
-![Import preview and confirmation](docs/images/ui-import.png)
+![Import preview and confirmation](docs/images/ui-import-en.png)
 
 Check the AI output against the original: section counts, first/last entries, important journals such as QJE, page continuations, ISSNs, grades and repeated journals across subjects. The plugin cannot recover journals missing from the imported file.
 
 ### Filter papers
 
-The top **当前目录** selector determines which policy applies. Choose **等级** (Grade), **匹配状态** (Match status), or search by paper title, journal or alias. After changing the collection or search in Zotero, click **刷新当前列表** (Refresh current list).
+The top **Active catalog** selector determines which policy applies. Choose **Grade**, **Match status**, or search by paper title, journal or alias. After changing the collection or search in Zotero, click **Refresh current list**.
 
-![Paper filter and row actions](docs/images/ui-papers.png)
+![Paper filter and row actions](docs/images/ui-papers-en.png)
 
-- **定位** (Locate) selects the original item in Zotero.
-- **依据** (Evidence) shows matched entries, aliases, ISSNs, subjects and catalog version.
-- **已匹配** means matched; **待确认** means conflicting evidence; **目录未收录** means no corresponding entry; **信息不足** means insufficient item metadata.
+- **Locate** selects the original item in Zotero.
+- **Evidence** shows matched entries, aliases, ISSNs, subjects and catalog version.
+- **Matched** means matched; **Needs review** means conflicting evidence; **Not listed** means no corresponding entry; **Missing metadata** means insufficient item metadata.
 - Filtering applies to journal articles in the current main-window list. It does not change item fields or tags.
 
 ### Maintain catalogs
 
-Search by name, alias, ISSN or grade under **目录管理**. Keep multiple schools, departments or policy versions and switch using the top selector. Export a catalog to share it with colleagues.
+Search by name, alias, ISSN or grade under **Catalogs**. Keep multiple schools, departments or policy versions and switch using the top selector. Export a catalog to share it with colleagues.
 
 ## AI preparation prompt
 
@@ -141,10 +141,10 @@ Matching handles capitalization, spacing, ampersands, confirmed aliases, ISSNs, 
 
 | Problem | Action |
 | --- | --- |
-| Grade column missing | Right-click the item-list header, enable 学院等级, and select a catalog. |
+| Grade column missing | Right-click the item-list header, enable Institutional grade, and select a catalog. |
 | Expected journal shown as unlisted | Search the imported catalog first; check missing AI records, aliases, journal fields and ISSNs. |
-| Match requires confirmation | Click 依据, compare conflicting entries against the official source, then correct and reimport the catalog. |
-| Old or broken dropdown still appears | Confirm plugin version 0.1.4 or newer under Tools → Plugins, close old windows and restart Zotero. This version includes resource cache handling. |
+| Match requires confirmation | Click Evidence, compare conflicting entries against the official source, then correct and reimport the catalog. |
+| Old or broken dropdown still appears | Confirm plugin version 0.1.5 or newer under Tools → Plugins, close old windows and restart Zotero. This version includes resource cache handling. |
 | Prompt copy fails | Copy from the plain-text links above. |
 | Sharing or moving computers | Export JSON and import it on the other machine. Catalogs do not sync through Zotero. |
 | Does publication year select the policy? | No. The currently selected catalog applies to all papers. |
@@ -169,12 +169,12 @@ npm run build
 python scripts/verify_release.py
 ```
 
-Output: `dist/your-journal-list-0.1.4.xpi`, a SHA-256 file and `updates.json`. Run actual Zotero integration tests in a disposable profile and data directory:
+Output: `dist/your-journal-list-0.1.5.xpi`, a SHA-256 file and `updates.json`. Run actual Zotero integration tests in a disposable profile and data directory:
 
 ```sh
 python scripts/smoke_zotero.py --zotero "C:/Program Files/Zotero/zotero.exe"
 ```
 
-With `dist/your-journal-list-0.1.3.xpi` present, the test also checks update discovery, download, installation, catalog retention and warm-cache replacement. Otherwise the upgrade section is skipped. See the [test report](docs/test-report.json). Optional `scripts/preview-ui.cjs` uses Playwright to render documentation previews; it is not required by the plugin.
+With `dist/your-journal-list-0.1.4.xpi` present, the test also checks update discovery, download, installation, catalog retention and warm-cache replacement. Otherwise the upgrade section is skipped. Use `--locale zh-CN` or `--locale en-US` to test each language. See the [Chinese](docs/test-report.json) and [English](docs/test-report.en.json) test reports. Optional `scripts/preview-ui.cjs` uses Playwright to render documentation previews; it is not required by the plugin.
 
 MIT License. Report problems in [Issues](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/issues) with Zotero/plugin versions, reproduction steps and a sanitized catalog excerpt.
