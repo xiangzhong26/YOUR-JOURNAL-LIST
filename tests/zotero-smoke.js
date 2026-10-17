@@ -183,6 +183,52 @@ async function runSmoke() {
       if (app.l10n.locale === "en") check(upgradedUI.$("refresh").textContent === "Refresh current list", "Upgrade loads English interface over the Chinese-only previous version");
       result.update = "v0.1.4 to current version through local HTTP feed with SHA-256; GitHub production feed requires a published stable release";
     }
+    if (__CAPTURE_PATH__) {
+      for (const window of app.dialogs) if (!window.closed) window.close();
+      const {catalog: display} = await app.readImport(__DISPLAY_CATALOG__);
+      await app.importCatalog(display);
+      const collection = new Zotero.Collection();
+      collection.name = app.l10n.locale === "en" ? "Journal grade demonstration" : "期刊等级演示";
+      await collection.saveTx();
+      const demoCases = [
+        ["The Quarterly Journal of Economics", "Economic evidence and institutions"],
+        ["QUARTERLY JOURNAL OF ECONOMICS", "Economic evidence and institutions (uppercase journal)"],
+        ["Management Science", "Organization and decision making"],
+        ["MANAGEMENT SCIENCE", "Organization and decision making (uppercase journal)"],
+        ["R&D Management", "Collaboration in research and development"],
+        ["RD MANAGEMENT", "Collaboration in research and development (alias)"]
+      ];
+      for (const [journal,title] of demoCases) {
+        const article = new Zotero.Item("journalArticle");
+        article.setField("title", title); article.setField("publicationTitle",journal);
+        article.setField("date", "2024");
+        article.setCreators([{firstName:"Alex",lastName:"Chen",creatorType:"author"}]);
+        article.setCollections([collection.id]); await article.saveTx();
+      }
+      win.resizeTo(1500, 850);
+      await win.ZoteroPane.collectionsView.selectCollection(collection.id);
+      await delay(800);
+      const view = win.ZoteroPane.itemsView;
+      for (const key of ["publicationTitle",app.columnKey]) {
+        const columns = view._getColumns();
+        const columnIndex = columns.findIndex(c=>c.dataKey===key);
+        if (columnIndex >= 0 && columns[columnIndex].hidden) view.tree._columns.toggleHidden(columnIndex);
+      }
+      const columnPrefs = view._getColumnPrefs();
+      for (const [key,width] of [["title",310],["firstCreator",75],["publicationTitle",340],[app.columnKey,140]]) columnPrefs[key] = {...columnPrefs[key],width,flex:0};
+      view._storeColumnPrefs(columnPrefs);
+      await view._resetColumns();
+      await delay(500);
+      check(view._getColumns().some(c=>c.dataKey===app.columnKey && !c.hidden), "Grade column enabled in actual Zotero library");
+      const bounds = new win.DOMRect(0,0,win.innerWidth,Math.min(390,win.innerHeight));
+      const bitmap = await win.browsingContext.currentWindowGlobal.drawSnapshot(bounds,1,"white");
+      const canvas = win.document.createElementNS("http://www.w3.org/1999/xhtml","canvas");
+      canvas.width=bitmap.width; canvas.height=bitmap.height;
+      canvas.getContext("2d").drawImage(bitmap,0,0); bitmap.close();
+      const blob = await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+      await IOUtils.write(__CAPTURE_PATH__,new Uint8Array(await blob.arrayBuffer()));
+      check(true,"Actual Zotero library document captured with synthetic data");
+    }
     result.ok = true;
   }
   catch (error) { result.error = error.message + "\n" + error.stack; }

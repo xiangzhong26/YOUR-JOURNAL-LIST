@@ -12,23 +12,20 @@ const path = require("node:path");
   await page.addScriptTag({path:path.join(root,"addon/content/i18n.js")});
   const language = process.env.UI_LOCALE || "zh-CN";
   const suffix = language.startsWith("zh") ? "" : "-en";
-  await page.evaluate(language => {
+  await page.evaluate(({language,display}) => {
     JournalListI18n.use(language);
-    const journals = [
-      { title:"Quarterly Journal of Economics", aliases:["The Quarterly Journal of Economics", "QJE"], grade:"Top Tier（国际顶级）", subject:"经济学", issn:["0033-5533"] },
-      { title:"Management Science", aliases:[], grade:"First Tier（国际一类）", subject:"管理学", issn:[] },
-      { title:"R & D Management", aliases:["R&D Management", "RD MANAGEMENT"], grade:"Second Tier II（国际二类Ⅱ）", subject:"管理学", issn:["0033-6807"] }
-    ];
-    const cat = {id:"demo", name:"示例学院期刊目录", institution:"示例大学", department:"商学院", version:"2024", journals};
+    const cat = display;
+    const journals = cat.journals;
+    Object.assign(cat,{id:"demo"});
     const titles = ["Innovation and firm productivity", "Evidence on organization and incentives", "Research collaboration across industries"];
-    const items = journals.map((j,i)=>({ id:i+1, getField:key=>key==="title" ? titles[i] : key==="publicationTitle" ? j.aliases[0]||j.title : "", journal:j }));
+    const items = journals.map((j,i)=>({ id:i+1, getField:key=>key==="title" ? titles[i] : key==="publicationTitle" ? ["The Quarterly Journal of Economics","Management Science","R&D Management"][i] : "", journal:j }));
     const app = {l10n:JournalListI18n,state:{catalogs:[cat],activeId:"demo"},dialogs:new Set(),activeCatalog:()=>cat,getViewItems:()=>items,itemEligible:()=>true,match:item=>({status:"matched",grade:item.journal.grade,method:"刊名 / 已确认别名",entries:[item.journal]}),activate:async()=>{},readImport:async()=>({catalog:cat,warnings:[],originalCount:3}), chooseFile:async()=>"demo"};
     window.arguments=[app, {ZoteroPane:{selectItem:async()=>{}},focus(){}}];
     if (!language.startsWith("zh")) {
       Object.assign(cat,{name:"Department journal catalog",institution:"Example university",department:"Business school"});
       journals.forEach(j=>{ j.grade=j.grade.split("（")[0]; j.subject=""; });
     }
-  }, language);
+  }, {language,display:JSON.parse(fs.readFileSync(path.join(root,"examples/display-catalog.json"),"utf8"))});
   await page.addScriptTag({path:path.join(root,"addon/content/dropdown.js")});
   await page.addScriptTag({path:path.join(root,"addon/content/manager.js")});
   await page.evaluate(()=>JournalListUI.init());

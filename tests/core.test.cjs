@@ -6,6 +6,16 @@ const example = fs.readFileSync(new URL('../examples/demo-journals.json', `file:
 const fixture = () => core.parseCatalog(example).catalog;
 const match = item => core.matchJournal(core.buildIndex(fixture()), item);
 
+test('capitalization matches in both directions without explicit case aliases', () => {
+  for (const canonical of ['Management Science', 'MANAGEMENT SCIENCE']) {
+    const { catalog } = core.validateCatalog({ journals: [{ title: canonical, grade: 'A', aliases: [] }] });
+    const index = core.buildIndex(catalog);
+    for (const title of ['Management Science', 'MANAGEMENT SCIENCE', 'management science']) {
+      assert.equal(core.matchJournal(index, { title }).grade, 'A');
+    }
+  }
+});
+
 test('user examples: capitalization, ampersand spacing and explicit aliases share one grade', () => {
   for (const title of ['R & D Management', 'RD MANAGEMENT', 'RD Management', 'R&D Management', 'R&D MANAGEMENT', ' Ｒ＆Ｄ Management ']) {
     assert.equal(match({ title }).grade, 'A类', title);

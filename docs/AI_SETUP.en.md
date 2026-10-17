@@ -6,25 +6,36 @@ Codex, Claude Code and other file-capable agents can follow this repository's se
 
 The AI extracts the source material, validates an import file, then helps configure the plugin. Supported source formats and access to your desktop Zotero depend on the agent's tools and permissions; this is not a universal document importer built into Zotero.
 
-## Recommended: local Codex or Claude Code
+## Recommended: attach materials and copy the request
 
-1. Download or clone [this repository](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST) and open its folder in your agent.
-2. Put official source materials under `.local/input/`, or give the agent their exact local paths. PDF, Word, Excel, images, CSV and text are potential inputs. Scans need image/OCR capabilities. Keep institutional materials out of the public repository.
-3. Send the following request, replacing the source path:
+1. Attach official materials in Codex / Claude, or give a local agent their paths.
+2. Copy the request below. The repository URL is included; the agent fetches the project itself.
+3. If network, attachment or execution access is unavailable, the agent should explain the limitation and deliver the available files and remaining steps.
 
-   ```text
-   Follow this repository's AGENTS.md (and CLAUDE.md for Claude) and
-   skills/configure-journal-list/SKILL.md to configure Your Journal List for me.
-   My official institutional journal materials are at: <file or folder path>.
-   Identify the institution, department, policy version and grades from the sources.
-   Reconcile every page/group, continued titles, ISSNs, aliases and record counts.
-   Create an importable catalog and source-audit report, then run the shared validator.
-   Keep departments/versions separate. Report unreadable or unverified content; do not guess.
-   If you can interact with my local Zotero, install the plugin if needed, import and
-   activate a new catalog without replacing existing ones, and verify the result.
-   Otherwise deliver the files and explain the remaining installation/import clicks.
-   Keep private materials and output under .local/. Do not commit or publish them.
-   ```
+```text
+Use this open-source project to configure institutional journal grades in my Zotero:
+https://github.com/xiangzhong26/YOUR-JOURNAL-LIST
+
+My official school/department materials are attached. If inaccessible, tell me what sources you need.
+Access the repository yourself. With local command tools, clone/download it into a new working
+folder without overwriting existing projects; do not require me to download it first.
+Read AGENTS.md, CLAUDE.md and skills/configure-journal-list/SKILL.md, then follow the workflow.
+If the repository page is inaccessible, try the direct instruction file:
+https://raw.githubusercontent.com/xiangzhong26/YOUR-JOURNAL-LIST/master/skills/configure-journal-list/SKILL.md
+
+Identify the institution, department, policy version and grades from the sources.
+Reconcile every page/group, continued titles, ISSNs, aliases and counts. Keep departments and
+versions separate. Do not guess grades or identifiers; report unresolved entries in the source audit.
+The plugin ignores case; do not enumerate every capitalization variant. Missing symbols,
+abbreviations and alternative names require verified explicit aliases.
+Deliver importable JSON and a source-audit report; run the shared validator when execution is available.
+If you can interact with my local Zotero, install if needed, import and activate a new catalog
+without replacing existing catalogs, and verify it. Otherwise deliver files and remaining clicks;
+do not claim installation/import you did not perform.
+Keep private materials/results under .local/ or a private folder. Do not commit or publish them.
+If repository access or a source format is unsupported, explain the specific limitation and ask
+only for the files needed to proceed.
+```
 
 4. Expect a new private delivery folder containing:
 
@@ -41,7 +52,7 @@ The AI extracts the source material, validates an import file, then helps config
 
 ## Repository link plus attachments
 
-You can give an AI the repository URL and attach the documents, then send the request above. It must be able to access both. A pasted URL does not guarantee automatic loading of all instructions: explicitly ask it to read AGENTS.md, CLAUDE.md and the setup skill. If it cannot browse, supply a repository ZIP. In restricted environments, provide the relevant instructions and preparation prompt directly.
+This is the default workflow: attach your documents and send the request above containing the repository URL. It must be able to access both. A pasted URL does not guarantee automatic loading of all instructions: explicitly ask it to read AGENTS.md, CLAUDE.md and the setup skill. If it cannot browse, supply a repository ZIP. In restricted environments, provide the relevant instructions and preparation prompt directly.
 
 Web-only chat usually cannot install software in your desktop Zotero. It can deliver JSON for manual import instead. No Zotero credentials or GitHub token are needed. Uploaded materials are handled by your chosen AI provider; choose an environment appropriate for the materials.
 

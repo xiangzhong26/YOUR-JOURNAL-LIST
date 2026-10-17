@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "name": "示例学院期刊目录",
+  "institution": "示例大学",
+  "department": "商学院",
+  "version": "2024-demo",
+  "source": "人工构造的展示数据，等级仅为演示，不代表学校政策",
+  "journals": [
+    {
+      "title": "Quarterly Journal of Economics",
+      "aliases": [
+        "QUARTERLY JOURNAL OF ECONOMICS",
+        "The Quarterly Journal of Economics",
+        "QJE"
+      ],
+      "grade": "Top Tier",
+      "subject": "经济学",
+      "issn": [
+        "0033-5533"
+      ],
+      "notes": "全大写别名仅用于展示；纯大小写变化无需额外别名。"
+    },
+    {
+      "title": "Management Science",
+      "aliases": [
+        "MANAGEMENT SCIENCE"
+      ],
+      "grade": "First Tier",
+      "subject": "管理学",
+      "issn": [],
+      "notes": "全大写别名可省略，插件自动忽略大小写。"
+    },
+    {
+      "title": "R & D Management",
+      "aliases": [
+        "R & D MANAGEMENT",
+        "R&D Management",
+        "RD MANAGEMENT"
+      ],
+      "grade": "Second Tier II",
+      "subject": "管理学",
+      "issn": [
+        "0033-6807"
+      ],
+      "notes": "RD MANAGEMENT 省略了 &，需要显式别名；大小写和 & 两侧空格自动处理。"
+    }
+  ]
+}

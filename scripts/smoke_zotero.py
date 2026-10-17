@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--zotero', default='C:/Program Files/Zotero/zotero.exe')
     parser.add_argument('--locale', default='zh-CN')
+    parser.add_argument('--capture-library', help='Save an actual Zotero document render using synthetic demonstration data')
     args = parser.parse_args()
     if not Path(args.zotero).is_file():
         raise SystemExit('Use --zotero to specify your Zotero executable')
@@ -56,6 +57,8 @@ def main():
     }
     (profile / 'prefs.js').write_text('\n'.join(f'user_pref({json.dumps(k)}, {json.dumps(v)});' for k, v in prefs.items()), encoding='utf-8')
     source = (ROOT / 'tests/zotero-smoke.js').read_text(encoding='utf-8')
+    source = source.replace('__CAPTURE_PATH__', json.dumps(str(Path(args.capture_library).resolve()) if args.capture_library else ''))
+    source = source.replace('__DISPLAY_CATALOG__', json.dumps(str(ROOT / 'examples/display-catalog.json')))
     source = source.replace('__TARGET_VERSION__', json.dumps(json.loads((ROOT / 'addon/manifest.json').read_text(encoding='utf-8'))['version']))
     source = source.replace('__RESULT_PATH__', json.dumps(str(profile / 'result.json')))
     source = source.replace('__FIXTURE_PATH__', json.dumps(str(ROOT / 'examples/demo-journals.json')))

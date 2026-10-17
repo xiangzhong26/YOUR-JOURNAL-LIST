@@ -1,0 +1,22 @@
+Use this open-source project to configure institutional journal grades in my Zotero:
+https://github.com/xiangzhong26/YOUR-JOURNAL-LIST
+
+My official school/department materials are attached. If inaccessible, tell me what sources you need.
+Access the repository yourself. With local command tools, clone/download it into a new working
+folder without overwriting existing projects; do not require me to download it first.
+Read AGENTS.md, CLAUDE.md and skills/configure-journal-list/SKILL.md, then follow the workflow.
+If the repository page is inaccessible, try the direct instruction file:
+https://raw.githubusercontent.com/xiangzhong26/YOUR-JOURNAL-LIST/master/skills/configure-journal-list/SKILL.md
+
+Identify the institution, department, policy version and grades from the sources.
+Reconcile every page/group, continued titles, ISSNs, aliases and counts. Keep departments and
+versions separate. Do not guess grades or identifiers; report unresolved entries in the source audit.
+The plugin ignores case; do not enumerate every capitalization variant. Missing symbols,
+abbreviations and alternative names require verified explicit aliases.
+Deliver importable JSON and a source-audit report; run the shared validator when execution is available.
+If you can interact with my local Zotero, install if needed, import and activate a new catalog
+without replacing existing catalogs, and verify it. Otherwise deliver files and remaining clicks;
+do not claim installation/import you did not perform.
+Keep private materials/results under .local/ or a private folder. Do not commit or publish them.
+If repository access or a source format is unsupported, explain the specific limitation and ask
+only for the files needed to proceed.

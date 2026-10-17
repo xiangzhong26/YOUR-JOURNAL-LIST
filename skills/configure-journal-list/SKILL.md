@@ -11,7 +11,7 @@ Use the user's provided school/department materials and this repository to deliv
 
 - Local agent with file/command tools: process accessible materials, run the validator, and obtain/build the plugin if needed. If desktop control or an established Zotero integration is available, complete installation/import through Zotero and verify the result. Use the environment's supported automation tools.
 - Agent without local access: create downloadable catalog/report artifacts where supported. Otherwise provide the JSON text and precise saving/import steps. Do not claim to have run commands or configured Zotero.
-- A repository URL alone may not expose files to the agent. Fetch/clone the repository with available tools, or ask for its ZIP/relevant instructions if access fails. Do not assume AGENTS.md/CLAUDE.md was automatically loaded.
+- The default user request includes https://github.com/xiangzhong26/YOUR-JOURNAL-LIST and attached policy materials. Fetch/clone the repository yourself with available tools into a new working directory; do not require users to download it first or overwrite an existing checkout. A repository URL alone may not expose every file: explicitly read the entry points and their references. Only ask for the ZIP/relevant instructions when network access fails.
 
 ## Prepare the policy data
 

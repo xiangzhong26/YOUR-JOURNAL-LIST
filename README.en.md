@@ -6,13 +6,38 @@ Import your institution's journal rankings into Zotero, display grades beside pa
 
 No AI key or server required. Use your preferred AI to prepare the catalog once; matching runs locally. Supports multiple catalogs, journal aliases and ISSNs.
 
-## Let Codex or Claude help configure it
+## Attach materials and let an AI configure it
 
-Give your AI **the official policy materials and this repository**. For local Codex or Claude Code, open the repository and send:
+**No manual repository download required up front.** Attach your official materials and copy the complete request below. The agent fetches the repository and reads its instructions.
 
-> Read AGENTS.md, CLAUDE.md and skills/configure-journal-list/SKILL.md. Use my supplied institutional materials to prepare, audit and validate an import file. If you can interact with local Zotero, install/import and verify it; otherwise deliver the files and remaining clicks. Keep private materials and results under .local/, out of Git commits.
+```text
+Use this open-source project to configure institutional journal grades in my Zotero:
+https://github.com/xiangzhong26/YOUR-JOURNAL-LIST
 
-Source formats depend on the agent's file/OCR tools. This repository supplies the workflow and the plugin's shared validator; a web chat or repository URL alone cannot guarantee access to desktop Zotero. See the **[AI-assisted setup guide](docs/AI_SETUP.en.md)** for the complete request, expected files and local/web workflows.
+My official school/department materials are attached. If inaccessible, tell me what sources you need.
+Access the repository yourself. With local command tools, clone/download it into a new working
+folder without overwriting existing projects; do not require me to download it first.
+Read AGENTS.md, CLAUDE.md and skills/configure-journal-list/SKILL.md, then follow the workflow.
+If the repository page is inaccessible, try the direct instruction file:
+https://raw.githubusercontent.com/xiangzhong26/YOUR-JOURNAL-LIST/master/skills/configure-journal-list/SKILL.md
+
+Identify the institution, department, policy version and grades from the sources.
+Reconcile every page/group, continued titles, ISSNs, aliases and counts. Keep departments and
+versions separate. Do not guess grades or identifiers; report unresolved entries in the source audit.
+The plugin ignores case; do not enumerate every capitalization variant. Missing symbols,
+abbreviations and alternative names require verified explicit aliases.
+Deliver importable JSON and a source-audit report; run the shared validator when execution is available.
+If you can interact with my local Zotero, install if needed, import and activate a new catalog
+without replacing existing catalogs, and verify it. Otherwise deliver files and remaining clicks;
+do not claim installation/import you did not perform.
+Keep private materials/results under .local/ or a private folder. Do not commit or publish them.
+If repository access or a source format is unsupported, explain the specific limitation and ask
+only for the files needed to proceed.
+```
+
+[English request as plain text](docs/ai-setup-request.en.txt) / [中文请求](docs/ai-setup-request.zh-CN.txt).
+
+Local Zotero automation and source formats depend on the agent’s tools. Without desktop access it delivers files for manual import. See the [AI setup guide](docs/AI_SETUP.en.md).
 
 ## Start here
 
@@ -29,7 +54,11 @@ Manifest compatibility: **Zotero 7–10 desktop**. Tested on **Windows / Zotero 
 
 ## Illustrated guide
 
-These are **browser-rendered previews of the current interface source**, with fictional school and paper data. In Zotero, dropdowns use native menus whose appearance depends on the operating system. These are not screenshots of Zotero itself.
+This is an **actual Windows / Zotero 10.0.6 item-list capture** from an isolated library using synthetic papers and demonstration grades. Case variants and confirmed aliases show the same grade.
+
+![Institutional grade in the actual Zotero item list](docs/images/zotero-library-en.png)
+
+The plugin-window images below are **browser-rendered previews of the current UI source**. Zotero uses native dropdown menus. The [display catalog](examples/display-catalog.json) uses illustrative grades, not institutional policy.
 
 ### Import a catalog
 
@@ -117,6 +146,12 @@ Deliverables:
 
 </details>
 
+## Do capitalization variants need aliases?
+
+**No.** Canonical titles and aliases are matched case-insensitively. `Management Science`, `MANAGEMENT SCIENCE` and `management science` receive the same grade, including when the canonical title is uppercase. Mechanical title casing can damage official spellings such as `R&D`.
+
+The display example includes uppercase aliases for visual checking; they are optional. Explicit aliases are needed for genuinely different spellings such as `RD MANAGEMENT` without the ampersand, or verified abbreviations such as `QJE`. Abbreviations shared by different journals remain conflicting.
+
 ## File format
 
 Use UTF-8 JSON. Minimal example (the grade is illustrative):
@@ -184,5 +219,7 @@ python scripts/smoke_zotero.py --zotero "C:/Program Files/Zotero/zotero.exe"
 ```
 
 With `dist/your-journal-list-0.1.4.xpi` present, the test also checks update discovery, download, installation, catalog retention and warm-cache replacement. Otherwise the upgrade section is skipped. Use `--locale zh-CN` or `--locale en-US` to test each language. See the [Chinese](docs/test-report.json) and [English](docs/test-report.en.json) test reports. Optional `scripts/preview-ui.cjs` uses Playwright to render documentation previews; it is not required by the plugin.
+
+Reproduce the actual library capture with `python scripts/smoke_zotero.py --locale en-US --capture-library docs/images/zotero-library-en.png`. Captures use only `examples/display-catalog.json` and synthetic papers in an isolated profile.
 
 MIT License. Report problems in [Issues](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/issues) with Zotero/plugin versions, reproduction steps and a sanitized catalog excerpt.

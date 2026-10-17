@@ -6,13 +6,34 @@
 
 **不需要 AI 密钥或服务器。** AI 只用于事先整理学校文件；插件在本机匹配，支持多份目录和中英文期刊。
 
-## 让 Codex / Claude 帮你配置
+## 上传材料，让 AI 帮你配置
 
-不想自己整理文件？可以把**学校目录材料与本仓库**一起交给 AI。推荐在本地 Codex 或 Claude Code 中打开仓库，然后发送：
+**无需预先下载仓库。** 附上学校目录材料，完整复制下面的请求，AI 会自行获取项目并读取指引。
 
-> 请阅读 AGENTS.md、CLAUDE.md 和 skills/configure-journal-list/SKILL.md，使用我提供的学校目录材料，帮我整理、核对并校验导入文件；有本机 Zotero 操作能力时继续安装、导入并验证，否则交付文件和剩余点击步骤。私有材料和结果请放在 .local/，不要提交到 GitHub。
+```text
+请使用这个开源项目帮我配置 Zotero 的学院期刊目录：
+https://github.com/xiangzhong26/YOUR-JOURNAL-LIST
 
-支持的原始格式取决于 AI 的文件读取/OCR能力。仓库提供完整操作指引和与插件共用的校验工具；仅有网页聊天或仓库链接时，不能保证自动操作本机。详见 **[AI 协助配置指南](docs/AI_SETUP.md)**，包含可复制请求、输出文件说明和本地/网页两种用法。
+我的学校或学院期刊目录材料已附在这条消息中；如附件不可访问，请告诉我需要提供哪些材料。
+请自行访问仓库；有本地命令能力时，将仓库克隆或下载到新的工作目录，不覆盖已有项目，
+不要求我预先下载仓库。先阅读 AGENTS.md、CLAUDE.md 和
+skills/configure-journal-list/SKILL.md，再按其中指引处理材料。
+仓库主页不可访问时，可尝试直接读取：
+https://raw.githubusercontent.com/xiangzhong26/YOUR-JOURNAL-LIST/master/skills/configure-journal-list/SKILL.md
+
+识别材料中的学校、学院、政策版本和等级，逐页核对期刊、跨页续行、ISSN、别名与数量。
+不同学院或版本分别生成目录；不猜测等级或标识，未确认记录列入来源核对报告。
+插件自动忽略刊名大小写，无需机械枚举大小写；缺少符号、缩写及不同名称须核实后作为别名。
+生成可导入 JSON 和来源核对报告；有执行能力时运行仓库的共享校验工具。
+能操作我本机 Zotero 时，请保留现有目录，完成安装（如需要）、导入、启用和验证。
+不能操作时请交付文件及剩余点击步骤，不要声称已经安装或导入。
+私有材料和结果放在 .local/ 或私有目录，不要提交或发布到 GitHub。
+如无法联网读取指引或读取某种材料，请说明具体限制，再让我补充相应文件。
+```
+
+[中文配置请求纯文本](docs/ai-setup-request.zh-CN.txt) / [English request](docs/ai-setup-request.en.txt)。
+
+能否操作本机 Zotero、读取哪些格式取决于 AI 的工具能力；没有本机操作能力时交付文件供手动导入。详见 [AI 配置指南](docs/AI_SETUP.md)。
 
 ## 第一次使用
 
@@ -29,7 +50,11 @@
 
 ## 操作图解
 
-以下图片是**用当前界面源文件在浏览器渲染的预览**，使用虚构的学院与文献数据。Zotero 内实际使用原生下拉菜单，外观随系统变化；不是 Zotero 实机截图。
+下图是 **Windows / Zotero 10.0.6 实机文献列表区域截图**，来自独立测试库。期刊等级和文献为人工构造的展示数据；不同大小写及已确认别名显示同一等级。
+
+![Zotero 主文献列表中的学院等级列](docs/images/zotero-library.png)
+
+后面的插件窗口图片是**当前界面源文件的浏览器渲染预览**；实机使用 Zotero 原生下拉菜单。展示数据见 [示例目录 JSON](examples/display-catalog.json)，不代表学校政策。
 
 ### 导入目录
 
@@ -121,6 +146,12 @@
 
 </details>
 
+## 大小写是否需要另建别名？
+
+**不需要。** 标准刊名和别名匹配均忽略大小写：`Management Science`、`MANAGEMENT SCIENCE` 和 `management science` 得到相同等级；标准刊名全大写时也一样。机械地转为首字母大写还可能破坏 `R&D` 等正式写法。
+
+示例图中提供了全大写别名方便人工核对，但这是可省略的。真正需要补充的是不同写法，例如省略 `&` 的 `RD MANAGEMENT` 和经核实的简称 `QJE`。不同期刊共享简称仍会提示冲突。
+
 ## 文件格式
 
 推荐 JSON UTF-8。最小示例（示例等级不代表学校政策）：
@@ -188,5 +219,7 @@ python scripts/smoke_zotero.py --zotero "C:/Program Files/Zotero/zotero.exe"
 ```
 
 若 `dist` 中有旧版 `your-journal-list-0.1.4.xpi`，还会测试从旧版发现更新、下载、安装、目录保留和缓存刷新；没有旧包时跳过升级部分。支持 `--locale zh-CN` / `--locale en-US` 分别检查中英文环境。最新实测结果见 [中文环境报告](docs/test-report.json) / [英文环境报告](docs/test-report.en.json)。界面预览生成脚本为 `scripts/preview-ui.cjs`，使用可选的 Playwright，不参与插件运行。
+
+文献列表实机图由隔离测试库生成：`python scripts/smoke_zotero.py --locale zh-CN --capture-library docs/images/zotero-library.png`；英文使用 `--locale en-US` 和对应输出文件名。截图只使用 `examples/display-catalog.json` 与人工构造文献。
 
 MIT License。欢迎通过 [Issues](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/issues) 报告问题；请附 Zotero / 插件版本、复现步骤及脱敏目录片段。

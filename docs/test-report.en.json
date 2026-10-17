@@ -64,7 +64,9 @@
     "Upgrade closes the old UI",
     "Warm upgrade replaces cached custom menu with native control",
     "Warm upgrade loads new stylesheet without clearing caches",
-    "Upgrade loads English interface over the Chinese-only previous version"
+    "Upgrade loads English interface over the Chinese-only previous version",
+    "Grade column enabled in actual Zotero library",
+    "Actual Zotero library document captured with synthetic data"
   ],
   "version": "10.0.6",
   "error": "",
