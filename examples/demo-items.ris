@@ -1,0 +1,39 @@
+TY  - JOUR
+TI  - DEMO 1 - Standard journal title
+JO  - R&D Management
+ER  -
+
+TY  - JOUR
+TI  - DEMO 2 - Uppercase alias without ampersand
+JO  - RD MANAGEMENT
+ER  -
+
+TY  - JOUR
+TI  - DEMO 3 - Spaces around ampersand
+JO  - R & D Management
+ER  -
+
+TY  - JOUR
+TI  - DEMO 4 - Confirmed abbreviation
+JO  - J. Example Stud.
+ER  -
+
+TY  - JOUR
+TI  - DEMO 5 - Conflicting alias
+JO  - Shared Review
+ER  -
+
+TY  - JOUR
+TI  - DEMO 6 - Not listed
+JO  - Unknown Journal
+ER  -
+
+TY  - JOUR
+TI  - DEMO 7 - Missing journal metadata
+ER  -
+
+TY  - JOUR
+TI  - DEMO 8 - Match by ISSN
+JO  - Different supplied title
+SN  - 0033-6807
+ER  -

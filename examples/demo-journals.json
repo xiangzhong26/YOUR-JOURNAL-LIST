@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "name": "演示学院目录（虚构等级，仅供测试）",
+  "institution": "演示大学",
+  "department": "演示管理学院",
+  "version": "2026-demo",
+  "source": "人工构造的测试数据，不代表真实学校评级",
+  "journals": [
+    { "title": "R&D Management", "aliases": ["R & D Management", "RD Management", "RD MANAGEMENT"], "issn": ["0033-6807", "1467-9310"], "grade": "A类", "subject": "管理学", "notes": "虚构等级，别名用于演示" },
+    { "title": "Journal of Example Studies", "aliases": ["J. Example Stud."], "issn": [], "grade": "B类", "subject": "", "notes": "虚构期刊" },
+    { "title": "Example Review One", "aliases": ["Shared Review"], "issn": [], "grade": "A类", "subject": "", "notes": "故意与下一条使用相同别名，应显示待确认" },
+    { "title": "Example Review Two", "aliases": ["Shared Review"], "issn": [], "grade": "B类", "subject": "", "notes": "冲突测试" }
+  ]
+}

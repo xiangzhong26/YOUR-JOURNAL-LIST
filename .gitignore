@@ -8,3 +8,9 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local tools and OS files
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

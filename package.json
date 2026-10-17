@@ -1,0 +1,13 @@
+{
+  "name": "your-journal-list",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local institutional journal rankings for Zotero",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/core.test.cjs tests/app.test.cjs",
+    "build": "python scripts/build.py",
+    "check": "node --check addon/bootstrap.js && node --check addon/content/core.js && node --check addon/content/app.js && node --check addon/content/manager.js"
+  },
+  "engines": { "node": ">=20" }
+}
