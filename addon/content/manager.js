@@ -6,6 +6,10 @@ var JournalListUI = {
   async init() {
     [this.app, this.mainWindow] = window.arguments;
     window.resizeTo(1060, 850);
+    this.dropdowns = new Map([...document.querySelectorAll("select")].map(select => [select.id, new JournalListDropdown(select)]));
+    document.addEventListener("journal-list-dropdown-open", event => {
+      for (const [id, dropdown] of this.dropdowns) if (id !== event.detail) dropdown.close();
+    });
     const actions = {
       import: () => this.previewImport(), "confirm-import": () => this.confirmImport(),
       "cancel-import": () => { this.pending = null; this.$("preview").hidden = true; },
@@ -32,7 +36,10 @@ var JournalListUI = {
       this.page = 0; this.renderResults();
     });
     this.$("journal-query").addEventListener("input", () => this.renderJournals());
-    window.addEventListener("unload", () => this.app.dialogs.delete(window), { once: true });
+    window.addEventListener("unload", () => {
+      this.app.dialogs.delete(window);
+      for (const dropdown of this.dropdowns.values()) dropdown.destroy();
+    }, { once: true });
     this.renderCatalogs();
     this.captureItems();
     if (this.app.loadError) this.message(this.app.loadError, true);
@@ -53,7 +60,9 @@ var JournalListUI = {
     this.$("import").disabled = this.busy || !!this.app.loadError;
     this.$("confirm-import").disabled = this.busy || !this.pending;
     this.$("catalog").disabled = this.busy || noCatalog;
+    this.syncDropdowns();
   },
+  syncDropdowns() { for (const dropdown of this.dropdowns?.values() || []) dropdown.sync(); },
   option(select, value, label) {
     const option = document.createElement("option"); option.value = value; option.textContent = label; select.appendChild(option);
   },
@@ -85,6 +94,7 @@ var JournalListUI = {
     const mode = this.$("import-mode"); mode.replaceChildren();
     this.option(mode, "", "新增一份目录（保留现有目录）");
     for (const cat of this.app.state.catalogs) this.option(mode, cat.id, `替换：${cat.name} · ${cat.department} · ${cat.version}`);
+    this.syncDropdowns();
     this.$("preview").hidden = false;
     this.$("preview").scrollIntoView({ behavior: "smooth", block: "start" });
   },

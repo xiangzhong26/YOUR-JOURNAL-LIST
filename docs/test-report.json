@@ -21,6 +21,15 @@
     "Manager controls have a rendered layout",
     "Native file picker module initializes against manager window",
     "Filter captures current Zotero items",
+    "Grade dropdown uses one in-document menu instead of native select popup",
+    "Dropdown has an opaque background and exactly one rendered copy per option",
+    "Repeated opening does not duplicate dropdown options",
+    "Clicking grade option selects it, filters results, and closes the menu",
+    "Opening match-status menu closes the grade menu",
+    "Clicking match status filters the list without stray menu text",
+    "Escape dismisses the dropdown and updates accessibility state",
+    "Clicking outside dismisses the dropdown",
+    "Keyboard End and Enter choose the final status and apply its filter",
     "Grade filter returns four expected matches",
     "Conflict filter returns one ambiguous article",
     "Match explanation shows conflicting records",
@@ -38,12 +47,13 @@
     "Annotated/multi-subject column regression: Organization Science",
     "Annotated/multi-subject column regression: R&D Management",
     "Multi-subject matching preserves both evidence records",
-    "Annotated/multi-subject column regression: Management Science"
+    "Annotated/multi-subject column regression: Management Science",
+    "QJE with leading The matches the catalog without ISSN"
   ],
   "version": "10.0.6",
   "error": "",
   "persistence": "Catalog restored after actual add-on disable/enable",
   "testedAt": "2026-10-17",
   "platform": "Windows",
-  "pluginVersion": "0.1.2"
+  "pluginVersion": "0.1.3"
 }

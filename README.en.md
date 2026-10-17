@@ -22,7 +22,7 @@ All five images below are **operation illustrations, not application screenshots
 
 ### 1. Download, install, and open
 
-1. Open [GitHub Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) and download the `.xpi` asset, such as `your-journal-list-0.1.2.xpi`. **Source code ZIP is not the installable plugin.** If no release has been published, build locally using the developer instructions below.
+1. Open [GitHub Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) and download the `.xpi` asset, such as `your-journal-list-0.1.3.xpi`. **Source code ZIP is not the installable plugin.** If no release has been published, build locally using the developer instructions below.
 2. In Zotero, open **Tools → Plugins** (Chinese: **工具 → 插件**; wording can vary by version).
 3. Open the gear menu and choose **Install Plugin From File…**, select the downloaded `.xpi`, and finish installation.
 4. Return to the library and click **学院等级 · 导入目录** (Institutional grade · Import catalog) in the item-list toolbar. Alternatively, open **Tools → 学院期刊目录 / Your Journal List**.
@@ -109,9 +109,11 @@ Rules:
 1. Grades must come only from the official material I supply. Never invent, infer, raise, or lower a grade. Preserve the original grade wording, department, policy version, subject, and exceptions. Correctly apply grades stated in section headings or table groups to their journal entries. Do not translate grade values or official journal titles merely because this prompt is in English.
 2. Use one record per journal and grading context. Put different names for the same journal in aliases, preserving the name used in the source. The plugin already normalizes letter case, full-width characters, repeated whitespace, and spacing around &; do not enumerate every formatting variant.
    Exclude ranking annotations from canonical titles. For example, Strategic Management Journal (UT-Dallas 24) (FT 50) must have title Strategic Management Journal; preserve the annotated source form in aliases and ranking information in notes. FT50 and UT-Dallas 24 are not part of the journal title. Do not remove meaningful parenthetical edition, location, or discipline text.
+   Verify genuine leading-The variations, such as Quarterly Journal of Economics and The Quarterly Journal of Economics, and include the alternate form in aliases once identity is confirmed. Do not invent abbreviation expansions or omit known common forms; unresolved abbreviations belong in the review report.
 3. Actively identify common abbreviations, shortened names, and spellings with missing symbols, but add them only after confirming journal identity. For example, R & D Management and R&D MANAGEMENT are normalized automatically; RD Management should be an explicit alias after verification. Include a former title only if the institution's policy also applies to that title; do not assume grades carry over after a title change.
 4. Do not merge journals solely because their names look similar, and do not remove all spaces or punctuation indiscriminately. Abbreviations may refer to multiple journals.
 5. Include print ISSNs and electronic ISSNs only when supplied by the source or verified against reliable information. Unknown identifiers must be []; never invent them. Each ISSN must have eight characters and a valid check digit. If browsing is available, publisher sources may be used to verify identity, aliases, and ISSNs; record verification sources in notes. External sources must not change institutional grades. If you cannot browse, do not claim external verification.
+   Do not omit valid ISSNs already present in the official table. Report invalid check digits and identifiers assigned to different journals individually; do not guess replacement digits just to pass validation. CN publication numbers are not ISSNs. Shared ISSNs are permitted, but the report must flag them for title and grade checks.
 6. Merge duplicate rows only when the canonical journal, grade, and subject agree. Retain separate subjects and notes across disciplines. When the same journal has the same grade in multiple subjects, the plugin displays the agreed grade and preserves all evidence. Different grades still require review; it never chooses the highest grade. Different journals sharing an abbreviation remain ambiguous even when their grades agree.
 7. Produce separate files for different departments or policy versions. Put entries with uncertain journal identities or grades in a separate review list, outside journals. Do not use "needs review" as an official grade. Leave missing institution, department, version, or source metadata empty instead of guessing or copying example values.
 8. The plugin applies the selected list to all articles; it does not automatically evaluate publication year, author affiliation, article subtype, or similar policy conditions. Preserve these restrictions in notes and flag them for human review.
@@ -142,6 +144,7 @@ Deliverables:
 - If file generation is available, provide a downloadable journal-list.json and a separate verification report in the chat.
 - Otherwise, first reply with only the complete raw JSON, without Markdown fences or explanations, so I can save it as UTF-8 journal-list.json. Provide the verification report in a separate subsequent reply.
 - The report must state the documents and page ranges processed, original entry count, output record count, merged entry count, unresolved entries, conflicts, and exceptions. Clearly say when a total cannot be verified.
+- Reconcile counts page by page or group by group, and identify source pages and names for every merge. Handle journal-title continuations across pages, repeated headers, and changes of subject or grade without attaching the wrong heading. Reconcile valid source ISSNs with the output individually. Never assign a grade based on reputation to a journal that is not explicitly listed. Describe general CSSCI/JCR rules separately rather than inventing individual grades. Checking only a few famous journals is not a complete audit.
 - Before delivery, validate JSON syntax, required fields, field types, ISSN check digits, and title/alias collisions. If there are no confirmed records, explain what information is missing instead of inserting fictional example entries.
 ```
 
@@ -155,7 +158,7 @@ A minimal record in a catalog's `journals` array is:
 {"title": "Example Journal", "grade": "Example grade", "aliases": [], "issn": [], "subject": "", "notes": ""}
 ```
 
-Matching checks valid ISSNs first, then canonical titles, journal abbreviations, and explicit aliases. It normalizes case, full-width characters, repeated whitespace, and spacing around `&`. Known trailing `(UT-Dallas 24)` and `(FT 50)` membership annotations are ignored; meaningful parenthetical title text is retained. Other variants require verified aliases. There is no fuzzy guessing. A unique ISSN can disambiguate a shared alias, but contradictory explicit names trigger review. The same journal with the same grade across subjects displays that grade while preserving all subject records. Conflicting grades or different journal identities remain ambiguous.
+Matching checks valid ISSNs first, then canonical titles, journal abbreviations, and explicit aliases. It normalizes case, full-width characters, repeated whitespace, and spacing around `&`. Known trailing `(UT-Dallas 24)` and `(FT 50)` membership annotations are ignored; meaningful parenthetical title text is retained. If no exact name matches, it tries a leading-The variation with collision protection. Other variants require verified aliases. There is no fuzzy guessing. A unique ISSN can disambiguate a shared alias; an explicit name can disambiguate a shared ISSN. Contradictory explicit names trigger review. The same journal with the same grade across subjects displays that grade while preserving all subject records. Conflicting grades or different journal identities remain ambiguous.
 
 ## Troubleshooting
 
@@ -188,9 +191,9 @@ npm test
 npm run build
 ```
 
-Outputs: `dist/your-journal-list-0.1.2.xpi`, `.xpi.sha256`, and `updates.json`. To build only, run `python scripts/build.py`. On Windows / Zotero 10, `python scripts/smoke_zotero.py` runs integration checks in a new disposable profile; it does not install into your everyday profile.
+Outputs: `dist/your-journal-list-0.1.3.xpi`, `.xpi.sha256`, and `updates.json`. To build only, run `python scripts/build.py`. On Windows / Zotero 10, `python scripts/smoke_zotero.py` runs integration checks in a new disposable profile; it does not install into your everyday profile.
 
-There are 21 unit tests. The runtime-validation baseline is recorded in [test-report.json](docs/test-report.json). Before releasing, also check the native file dialogs, a complete restart, and visual layout manually.
+There are 23 unit tests. The runtime-validation baseline is recorded in [test-report.json](docs/test-report.json). Before releasing, also check the native file dialogs, a complete restart, and visual layout manually.
 
 To publish the first version after review:
 
@@ -198,8 +201,8 @@ To publish the first version after review:
 git add .
 git commit -m "Add journal list plugin and bilingual illustrated guides"
 git push -u origin HEAD
-git tag v0.1.2
-git push origin v0.1.2
+git tag v0.1.3
+git push origin v0.1.3
 ```
 
 For later releases, first update both `package.json` and `addon/manifest.json` and use a new matching tag. GitHub Actions checks the code, runs tests, builds the package, and creates a **draft release** with all three assets. Review the draft and publish it; a prerelease is recommended for initial testing. A private repository must be made public if you want unrestricted open-source access. Do not include personal Zotero libraries or restricted institutional documents. See the extended [release guide](docs/RELEASING.md) and [contribution guide](CONTRIBUTING.md), currently in Chinese.

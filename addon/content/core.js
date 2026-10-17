@@ -174,17 +174,21 @@
   }
 
   function buildIndex(catalog) {
-    const names = new Map(), issns = new Map();
+    const names = new Map(), articleNames = new Map(), issns = new Map();
     const add = (map, key, entry) => {
       if (!key) return;
       if (!map.has(key)) map.set(key, new Set());
       map.get(key).add(entry);
     };
     for (const entry of catalog?.journals || []) {
-      for (const name of [entry.title, ...entry.aliases]) add(names, normalizeName(name), entry);
+      for (const name of [entry.title, ...entry.aliases]) {
+        const normalized = normalizeName(name);
+        add(names, normalized, entry);
+        add(articleNames, normalized.replace(/^the\s+/u, ""), entry);
+      }
       for (const id of entry.issn) add(issns, normalizeISSN(id), entry);
     }
-    return { names, issns };
+    return { names, articleNames, issns };
   }
 
   function sameJournalAndGrade(entries) {
@@ -200,13 +204,24 @@
     for (const name of [item.title, item.abbreviation]) {
       for (const e of index.names.get(normalizeName(name)) || []) nameCandidates.add(e);
     }
+    // Only fall back on a leading "The" variation when no exact name/alias matched.
+    // Keep canonical identity unchanged so distinct journals still conflict safely.
+    if (!nameCandidates.size) {
+      for (const name of [item.title, item.abbreviation]) {
+        for (const e of index.articleNames?.get(normalizeName(name).replace(/^the\s+/u, "")) || []) nameCandidates.add(e);
+      }
+    }
     let candidates, method;
     if (idCandidates.size) {
       // A unique ISSN may disambiguate a shared alias, but conflicting explicit names fail closed.
       if (sameJournalAndGrade(idCandidates) && nameCandidates.size && ![...idCandidates].some(e => nameCandidates.has(e))) {
         return { status: "ambiguous", grade: "", method: "ISSN 与刊名冲突", entries: unique([...idCandidates, ...nameCandidates]) };
       }
-      candidates = idCandidates; method = "ISSN";
+      const overlap = new Set([...idCandidates].filter(e => nameCandidates.has(e)));
+      if (idCandidates.size > 1 && sameJournalAndGrade(overlap)) {
+        candidates = overlap; method = "ISSN + 刊名 / 已确认别名";
+      }
+      else { candidates = idCandidates; method = "ISSN"; }
     }
     else { candidates = nameCandidates; method = "刊名 / 已确认别名"; }
     if (sameJournalAndGrade(candidates)) return { status: "matched", grade: [...candidates][0].grade, method, entries: [...candidates] };

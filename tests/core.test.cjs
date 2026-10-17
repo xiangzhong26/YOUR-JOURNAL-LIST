@@ -55,6 +55,37 @@ test('multi-subject ISSN evidence does not override a contradictory explicit jou
   ] });
   assert.equal(core.matchJournal(core.buildIndex(catalog), { title: 'Another Journal', issn: '0033-6807' }).status, 'ambiguous');
 });
+
+test('leading The variations match QJE in either direction without losing exact-title priority', () => {
+  const { catalog } = core.validateCatalog({ journals: [
+    { title: 'Quarterly Journal of Economics', grade: 'Top Tier' },
+    { title: 'The Review of Example Studies', grade: 'A' }
+  ] });
+  const index = core.buildIndex(catalog);
+  assert.equal(core.matchJournal(index, { title: 'The Quarterly Journal of Economics' }).grade, 'Top Tier');
+  assert.equal(core.matchJournal(index, { title: 'Review of Example Studies' }).grade, 'A');
+  assert.equal(core.matchJournal(index, { title: 'The Quarterly Journal of Something Else' }).status, 'unlisted');
+  const exact = core.validateCatalog({ journals: [
+    { title: 'Journal X', grade: 'A' }, { title: 'The Journal X', grade: 'B' }
+  ] }).catalog;
+  assert.equal(core.matchJournal(core.buildIndex(exact), { title: 'The Journal X' }).grade, 'B');
+  const conflict = core.validateCatalog({ journals: [
+    { title: 'The Journal X', grade: 'A', aliases: ['The Shared Name'] },
+    { title: 'Distinct Journal', grade: 'A', aliases: ['The Shared Name'] }
+  ] }).catalog;
+  assert.equal(core.matchJournal(core.buildIndex(conflict), { title: 'Shared Name' }).status, 'ambiguous');
+});
+
+test('explicit journal names disambiguate a shared ISSN without assigning the highest grade', () => {
+  const { catalog } = core.validateCatalog({ journals: [
+    { title: 'American Economic Review (FT 50)', grade: 'Top Tier', issn: ['0002-8282'] },
+    { title: 'AER Papers and Proceedings', grade: 'Tier 2', issn: ['0002-8282'] }
+  ] });
+  const index = core.buildIndex(catalog);
+  assert.equal(core.matchJournal(index, { title: 'American Economic Review', issn: '0002-8282' }).grade, 'Top Tier');
+  assert.equal(core.matchJournal(index, { title: 'AER Papers and Proceedings', issn: '0002-8282' }).grade, 'Tier 2');
+  assert.equal(core.matchJournal(index, { issn: '0002-8282' }).status, 'ambiguous');
+});
 test('abbreviations and valid ISSNs identify journals', () => {
   assert.equal(match({ abbreviation: 'J. Example Stud.' }).grade, 'B类');
   assert.equal(match({ issn: '14679310' }).grade, 'A类');

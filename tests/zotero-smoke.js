@@ -65,6 +65,31 @@ async function runSmoke() {
     check(picker.modeOpen === 0, "Native file picker module initializes against manager window");
     ui.captureItems();
     check(ui.rows.length === 8, "Filter captures current Zotero items");
+    const gradeDropdown = ui.dropdowns.get("grade"), statusDropdown = ui.dropdowns.get("status");
+    gradeDropdown.trigger.focus(); gradeDropdown.trigger.click();
+    check(ui.$("grade").hidden && !gradeDropdown.list.hidden && gradeDropdown.trigger.getAttribute("aria-expanded") === "true", "Grade dropdown uses one in-document menu instead of native select popup");
+    check(dialog.getComputedStyle(gradeDropdown.list).backgroundColor !== "rgba(0, 0, 0, 0)" && gradeDropdown.list.children.length === ui.$("grade").options.length, "Dropdown has an opaque background and exactly one rendered copy per option");
+    for (let i = 0; i < 3; i++) { gradeDropdown.close(); gradeDropdown.open(); }
+    check(gradeDropdown.list.children.length === ui.$("grade").options.length, "Repeated opening does not duplicate dropdown options");
+    const gradeIndex = [...ui.$("grade").options].findIndex(o => o.value === "A类");
+    gradeDropdown.list.children[gradeIndex].click();
+    check(gradeDropdown.list.hidden && ui.$("grade").value === "A类" && ui.$("results").children.length === 4, "Clicking grade option selects it, filters results, and closes the menu");
+    ui.$("grade").value = ""; gradeDropdown.sync(); ui.renderResults();
+    gradeDropdown.trigger.focus(); gradeDropdown.open(); statusDropdown.open();
+    check(gradeDropdown.list.hidden && !statusDropdown.list.hidden, "Opening match-status menu closes the grade menu");
+    const statusIndex = [...ui.$("status").options].findIndex(o => o.value === "ambiguous");
+    statusDropdown.list.children[statusIndex].click();
+    check(ui.$("results").children.length === 1 && statusDropdown.list.hidden, "Clicking match status filters the list without stray menu text");
+    statusDropdown.trigger.focus(); statusDropdown.open();
+    statusDropdown.trigger.dispatchEvent(new dialog.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    check(statusDropdown.list.hidden && statusDropdown.trigger.getAttribute("aria-expanded") === "false", "Escape dismisses the dropdown and updates accessibility state");
+    statusDropdown.open(); ui.$("query").click();
+    check(statusDropdown.list.hidden, "Clicking outside dismisses the dropdown");
+    statusDropdown.trigger.focus(); statusDropdown.open();
+    statusDropdown.trigger.dispatchEvent(new dialog.KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    statusDropdown.trigger.dispatchEvent(new dialog.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    check(ui.$("status").value === "missing" && statusDropdown.list.hidden && ui.$("results").children.length === 1, "Keyboard End and Enter choose the final status and apply its filter");
+    ui.$("status").value = ""; statusDropdown.sync(); ui.renderResults();
     ui.$("grade").value = "A类"; ui.renderResults();
     check(ui.$("results").children.length === 4, "Grade filter returns four expected matches");
     ui.$("grade").value = ""; ui.$("status").value = "ambiguous"; ui.renderResults();
@@ -109,7 +134,8 @@ async function runSmoke() {
       { title: "Organization Science (UT-Dallas 24) (FT 50)", grade: "Tier 1" },
       { title: "R & D Management", grade: "Tier 3", subject: "Strategy", issn: ["0033-6807"] },
       { title: "R & D Management", grade: "Tier 3", subject: "Operations", issn: ["0033-6807"] },
-      { title: "Management Science", grade: "Tier 1" }
+      { title: "Management Science", grade: "Tier 1" },
+      { title: "Quarterly Journal of Economics", grade: "Top Tier", issn: ["0033-5533"] }
     ] });
     for (const [title, grade] of [["Strategic Management Journal", "Tier 1"], ["Organization Science", "Tier 1"], ["R&D Management", "Tier 3"], ["Management Science", "Tier 1"]]) {
       const article = new Zotero.Item("journalArticle");
@@ -117,6 +143,8 @@ async function runSmoke() {
       check(Zotero.ItemTreeManager.getCustomCellData(article, app.columnKey) === grade, "Annotated/multi-subject column regression: " + title);
       if (title === "R&D Management") check(app.match(article).entries.length === 2, "Multi-subject matching preserves both evidence records");
     }
+    const qje = new Zotero.Item("journalArticle"); qje.setField("publicationTitle", "The Quarterly Journal of Economics");
+    check(Zotero.ItemTreeManager.getCustomCellData(qje, app.columnKey) === "Top Tier", "QJE with leading The matches the catalog without ISSN");
     result.persistence = "Catalog restored after actual add-on disable/enable";
     result.ok = true;
   }
