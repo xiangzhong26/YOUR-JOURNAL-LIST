@@ -6,6 +6,14 @@ Import your institution's journal rankings into Zotero, display grades beside pa
 
 No AI key or server required. Use your preferred AI to prepare the catalog once; matching runs locally. Supports multiple catalogs, journal aliases and ISSNs.
 
+## Let Codex or Claude help configure it
+
+Give your AI **the official policy materials and this repository**. For local Codex or Claude Code, open the repository and send:
+
+> Read AGENTS.md, CLAUDE.md and skills/configure-journal-list/SKILL.md. Use my supplied institutional materials to prepare, audit and validate an import file. If you can interact with local Zotero, install/import and verify it; otherwise deliver the files and remaining clicks. Keep private materials and results under .local/, out of Git commits.
+
+Source formats depend on the agent's file/OCR tools. This repository supplies the workflow and the plugin's shared validator; a web chat or repository URL alone cannot guarantee access to desktop Zotero. See the **[AI-assisted setup guide](docs/AI_SETUP.en.md)** for the complete request, expected files and local/web workflows.
+
 ## Start here
 
 1. Download the `.xpi` under **Assets** on [Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases). Source code ZIP is not an installable plugin. If no release exists yet, build it using the development commands below.

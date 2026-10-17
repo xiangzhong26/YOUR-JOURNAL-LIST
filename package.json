@@ -5,9 +5,9 @@
   "description": "Local institutional journal rankings for Zotero",
   "license": "MIT",
   "scripts": {
-    "test": "node --test tests/core.test.cjs tests/app.test.cjs tests/i18n.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/app.test.cjs tests/i18n.test.cjs tests/prepare-catalog.test.cjs",
     "build": "python scripts/build.py",
-    "check": "node --check addon/bootstrap.js && node --check addon/content/i18n.js && node --check addon/content/core.js && node --check addon/content/app.js && node --check addon/content/dropdown.js && node --check addon/content/manager.js"
+    "check": "node --check addon/bootstrap.js && node --check addon/content/i18n.js && node --check addon/content/core.js && node --check addon/content/app.js && node --check addon/content/dropdown.js && node --check addon/content/manager.js && node --check scripts/prepare_catalog.cjs"
   },
   "engines": {
     "node": ">=20"

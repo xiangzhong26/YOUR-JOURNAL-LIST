@@ -6,6 +6,14 @@
 
 **不需要 AI 密钥或服务器。** AI 只用于事先整理学校文件；插件在本机匹配，支持多份目录和中英文期刊。
 
+## 让 Codex / Claude 帮你配置
+
+不想自己整理文件？可以把**学校目录材料与本仓库**一起交给 AI。推荐在本地 Codex 或 Claude Code 中打开仓库，然后发送：
+
+> 请阅读 AGENTS.md、CLAUDE.md 和 skills/configure-journal-list/SKILL.md，使用我提供的学校目录材料，帮我整理、核对并校验导入文件；有本机 Zotero 操作能力时继续安装、导入并验证，否则交付文件和剩余点击步骤。私有材料和结果请放在 .local/，不要提交到 GitHub。
+
+支持的原始格式取决于 AI 的文件读取/OCR能力。仓库提供完整操作指引和与插件共用的校验工具；仅有网页聊天或仓库链接时，不能保证自动操作本机。详见 **[AI 协助配置指南](docs/AI_SETUP.md)**，包含可复制请求、输出文件说明和本地/网页两种用法。
+
 ## 第一次使用
 
 1. 在 [Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) 的 **Assets** 下载 `.xpi`。不要下载 Source code ZIP。若尚未发布，开发者可按下文构建。
