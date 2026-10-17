@@ -5,30 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>学院期刊目录 · Your Journal List</title>
-  <link rel="stylesheet" href="manager.css" />
-  <script src="dropdown.js" defer="defer"></script>
-  <script src="manager.js" defer="defer"></script>
+  <link rel="stylesheet" href="manager.css?v=0.1.4" />
+  <script src="dropdown.js?v=0.1.4" defer="defer"></script>
+  <script src="manager.js?v=0.1.4" defer="defer"></script>
 </head>
 <body>
-  <header>
-    <div><span class="eyebrow">YOUR JOURNAL LIST</span><h1>你的学院，自己的期刊标准。</h1>
-    <p>导入一次目录，在每次阅读和筛选时找到期刊等级。</p></div>
-    <span class="local-badge">仅保存在本地</span>
-  </header>
+  <header><h1>学院期刊目录</h1><div class="catalog-picker"><label for="catalog">当前目录</label><select id="catalog"></select></div></header>
+  <nav aria-label="功能"><button data-tab="papers" role="tab">文献筛选</button><button data-tab="catalogs" role="tab">目录管理</button><button data-tab="help" role="tab">使用帮助</button></nav>
   <main>
-    <section class="card">
-      <div class="section-heading"><h2>学院目录</h2><button id="import" class="primary">导入 JSON / CSV</button></div>
-      <label for="catalog">当前使用的目录</label>
-      <div class="row"><select id="catalog"></select><button id="export">导出</button><button id="delete" class="danger">删除</button></div>
-      <p id="metadata" class="muted">尚未导入目录。</p>
-      <details><summary>首次使用与目录整理提示词</summary>
-        <p>将学院官方文件与下方提示词交给你使用的 AI；核对后，把生成的纯 JSON 文件导入。Excel 文件请另存为 CSV UTF-8。</p>
-        <p>在主文献列表的表头上右键勾选“学院等级”。等级筛选针对主窗口当前列表的期刊论文，不修改条目字段或标签。</p>
-        <button id="copy-prompt">复制 AI 整理提示词</button>
-        <button id="copy-prompt-en">Copy English prompt</button>
-      </details>
-    </section>
-    <section id="preview" class="card" hidden="hidden">
+  <section id="panel-catalogs" class="panel" hidden="hidden">
+    <div class="section-heading"><h2>目录管理</h2><div class="actions"><button id="import" class="primary">导入目录…</button><button id="export">导出…</button><button id="delete">删除</button></div></div>
+    <p id="metadata" class="muted"></p>
+    <section id="preview" class="import-preview" hidden="hidden">
       <h2>确认导入</h2>
       <div class="grid"><label>目录名称<input id="import-name" maxlength="200" /></label><label>学校<input id="import-institution" maxlength="200" /></label><label>学院<input id="import-department" maxlength="200" /></label><label>目录版本<input id="import-version" maxlength="100" /></label></div>
       <p id="import-summary"></p>
@@ -37,21 +25,31 @@
       <label for="import-mode">导入方式</label><select id="import-mode"></select>
       <div class="actions"><button id="confirm-import" class="primary">确认并启用</button><button id="cancel-import">取消</button></div>
     </section>
-    <section class="card">
-      <div class="section-heading"><div><h2>按等级找文献</h2><p class="muted">范围为主窗口当前文献列表；切换集合或搜索后，点击刷新。</p></div><button id="refresh">刷新当前列表</button></div>
+    <section id="catalog-browser" class="catalog-browser">
+      <h2>查看目录与别名</h2><label for="journal-query">搜索目录</label><input id="journal-query" type="search" placeholder="期刊名称、别名、ISSN 或等级" />
+      <p id="journal-count" class="muted"></p>
+      <div class="table-wrap"><table><thead><tr><th>标准刊名</th><th>别名</th><th>等级 / 学科</th><th>ISSN</th></tr></thead><tbody id="journals"></tbody></table></div>
+    </section>
+  </section>
+    <section id="panel-papers" class="panel">
+      <div class="section-heading"><div><h2>文献筛选</h2><p class="muted">筛选 Zotero 主窗口当前列表中的期刊论文。切换集合后请刷新。</p></div><button id="refresh">刷新当前列表</button></div>
       <div class="filters"><label>等级<select id="grade"><option value="">全部等级</option></select></label><label>匹配状态<select id="status"><option value="">全部状态</option><option value="matched">已匹配</option><option value="ambiguous">待确认</option><option value="unlisted">目录未收录</option><option value="missing">信息不足</option></select></label><label class="grow">检索标题或期刊<input id="query" type="search" placeholder="输入标题、刊名或目录别名" /></label></div>
       <p id="counts" class="muted" role="status"></p>
       <div class="table-wrap"><table><thead><tr><th>文献标题</th><th>期刊</th><th>等级</th><th>匹配依据</th><th>操作</th></tr></thead><tbody id="results"></tbody></table></div>
       <div class="pagination"><button id="previous">上一页</button><span id="page"></span><button id="next">下一页</button></div>
       <p id="detail" class="detail" hidden="hidden"></p>
     </section>
-    <section class="card">
-      <h2>查看目录与别名</h2><label for="journal-query">搜索目录</label><input id="journal-query" type="search" placeholder="期刊名称、别名、ISSN 或等级" />
-      <p id="journal-count" class="muted"></p>
-      <div class="table-wrap"><table><thead><tr><th>标准刊名</th><th>别名</th><th>等级 / 学科</th><th>ISSN</th></tr></thead><tbody id="journals"></tbody></table></div>
-    </section>
+  <section id="panel-help" class="panel help" hidden="hidden">
+    <h2>开始使用</h2>
+    <ol><li>把学校或学院的官方目录和整理提示词一起交给 AI。</li><li>检查生成文件中的期刊数量、等级、别名与 ISSN，保存为 .json。</li><li>在“目录管理”中导入文件，核对预览后点击“确认并启用”。</li><li>在 Zotero 文献列表的表头上右键，勾选“学院等级”。</li></ol>
+    <div class="actions"><button id="copy-prompt">复制中文提示词</button><button id="copy-prompt-en">Copy English prompt</button></div>
+    <h2>筛选与匹配</h2><p>选择集合后打开“文献筛选”，选择等级或匹配状态。点击“定位”返回原文献，“依据”查看目录记录。</p>
+    <p>“目录未收录”表示没有找到对应记录；“待确认”表示存在等级冲突。请检查期刊名称、ISSN 和目录别名。</p>
+    <h2>数据与版本</h2><p>支持 JSON 和 CSV UTF-8。目录保存在本机，可导出分享；不会随 Zotero 同步。等级按当前目录判定，不按论文发表年份自动切换政策。</p>
+    <p>本插件不调用 AI，也不自动联网抓取学校目录或新论文。升级插件会保留已导入目录。</p>
+  </section>
     <p id="message" role="status" aria-live="polite"></p>
-    <footer>等级来自你导入的目录。默认对全部论文使用所选目录，不自动按发表年份判定政策。目录与选择不会随 Zotero 同步；可导出后分享。</footer>
+
   </main>
 </body>
 </html>

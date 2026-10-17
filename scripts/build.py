@@ -1,6 +1,7 @@
 """Build an installable XPI using Python's standard library only."""
 import hashlib
 import json
+import re
 from pathlib import Path
 import zipfile
 
@@ -21,7 +22,10 @@ def build():
                 info = zipfile.ZipInfo(path.relative_to(ROOT / 'addon').as_posix(), (2026, 1, 1, 0, 0, 0))
                 info.compress_type = zipfile.ZIP_DEFLATED
                 info.external_attr = 0o644 << 16
-                archive.writestr(info, path.read_bytes())
+                content = path.read_bytes()
+                if path.name == "manager.xhtml":
+                    content = re.sub(rb"\?v=[0-9.]+", ("?v=" + version).encode(), content)
+                archive.writestr(info, content)
         info = zipfile.ZipInfo('LICENSE', (2026, 1, 1, 0, 0, 0))
         info.compress_type = zipfile.ZIP_DEFLATED
         info.external_attr = 0o644 << 16

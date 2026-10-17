@@ -7,7 +7,8 @@ var JournalListApp = {
   writeQueue: Promise.resolve(),
   loadError: "",
 
-  async start(pluginID) {
+  async start(pluginID, version = "dev") {
+    this.version = version;
     this.pluginID = pluginID;
     this.path = PathUtils.join(Zotero.DataDirectory.dir, "your-journal-list", "catalogs.json");
     if (await IOUtils.exists(this.path)) {
@@ -151,7 +152,7 @@ var JournalListApp = {
   openManager(win) {
     const existing = [...this.dialogs].find(d => !d.closed && d.opener === win);
     if (existing) { existing.focus(); return existing; }
-    const dialog = win.openDialog("chrome://yourjournallist/content/manager.xhtml", "", "chrome,centerscreen,resizable,dialog=no", this, win);
+    const dialog = win.openDialog("chrome://yourjournallist/content/manager.xhtml?v=" + encodeURIComponent(this.version), "", "chrome,centerscreen,resizable,dialog=no", this, win);
     this.dialogs.add(dialog);
     return dialog;
   },

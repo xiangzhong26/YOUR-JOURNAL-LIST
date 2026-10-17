@@ -58,7 +58,7 @@ async function runSmoke() {
     for (let i = 0; i < 40 && !dialog.JournalListUI?.app; i++) await delay(250);
     const ui = dialog.JournalListUI;
     check(ui?.app && dialog.document.getElementById("catalog").options.length === 1, "Manager XHTML and script loaded");
-    check(ui.$("import").getBoundingClientRect().width > 40 && dialog.innerWidth >= 700, "Manager controls have a rendered layout");
+    check(ui.$("refresh").getBoundingClientRect().width > 40 && dialog.innerWidth >= 700, "Manager controls have a rendered layout");
     const { FilePicker } = ChromeUtils.importESModule("chrome://zotero/content/modules/filePicker.mjs");
     const picker = new FilePicker();
     picker.init(dialog, "Smoke file picker initialization", picker.modeOpen);
@@ -66,29 +66,27 @@ async function runSmoke() {
     ui.captureItems();
     check(ui.rows.length === 8, "Filter captures current Zotero items");
     const gradeDropdown = ui.dropdowns.get("grade"), statusDropdown = ui.dropdowns.get("status");
-    gradeDropdown.trigger.focus(); gradeDropdown.trigger.click();
-    check(ui.$("grade").hidden && !gradeDropdown.list.hidden && gradeDropdown.trigger.getAttribute("aria-expanded") === "true", "Grade dropdown uses one in-document menu instead of native select popup");
-    check(dialog.getComputedStyle(gradeDropdown.list).backgroundColor !== "rgba(0, 0, 0, 0)" && gradeDropdown.list.children.length === ui.$("grade").options.length, "Dropdown has an opaque background and exactly one rendered copy per option");
-    for (let i = 0; i < 3; i++) { gradeDropdown.close(); gradeDropdown.open(); }
-    check(gradeDropdown.list.children.length === ui.$("grade").options.length, "Repeated opening does not duplicate dropdown options");
+    check(gradeDropdown.control.localName === "menulist" && gradeDropdown.popup.localName === "menupopup", "Uses Zotero native dropdown widgets");
+    check(ui.$("grade").hidden && gradeDropdown.control.getBoundingClientRect().height >= 25, "Hidden data select replaced by a rendered native control");
+    const before = ui.$("counts").getBoundingClientRect().top;
+    gradeDropdown.open(); await delay(300);
+    check(gradeDropdown.popup.state === "open", "Native grade popup opens outside document layout");
+    check(ui.$("counts").getBoundingClientRect().top === before, "Opening popup does not push content down");
+    gradeDropdown.close();
+    for (let i = 0; i < 3; i++) { gradeDropdown.open(); await delay(50); gradeDropdown.close(); }
+    check(gradeDropdown.popup.children.length === ui.$("grade").options.length, "Repeated opening never duplicates options");
     const gradeIndex = [...ui.$("grade").options].findIndex(o => o.value === "A类");
-    gradeDropdown.list.children[gradeIndex].click();
-    check(gradeDropdown.list.hidden && ui.$("grade").value === "A类" && ui.$("results").children.length === 4, "Clicking grade option selects it, filters results, and closes the menu");
+    gradeDropdown.popup.children[gradeIndex].doCommand();
+    check(ui.$("grade").value === "A类" && ui.$("results").children.length === 4, "Native grade command applies filter");
     ui.$("grade").value = ""; gradeDropdown.sync(); ui.renderResults();
-    gradeDropdown.trigger.focus(); gradeDropdown.open(); statusDropdown.open();
-    check(gradeDropdown.list.hidden && !statusDropdown.list.hidden, "Opening match-status menu closes the grade menu");
     const statusIndex = [...ui.$("status").options].findIndex(o => o.value === "ambiguous");
-    statusDropdown.list.children[statusIndex].click();
-    check(ui.$("results").children.length === 1 && statusDropdown.list.hidden, "Clicking match status filters the list without stray menu text");
-    statusDropdown.trigger.focus(); statusDropdown.open();
-    statusDropdown.trigger.dispatchEvent(new dialog.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-    check(statusDropdown.list.hidden && statusDropdown.trigger.getAttribute("aria-expanded") === "false", "Escape dismisses the dropdown and updates accessibility state");
-    statusDropdown.open(); ui.$("query").click();
-    check(statusDropdown.list.hidden, "Clicking outside dismisses the dropdown");
-    statusDropdown.trigger.focus(); statusDropdown.open();
-    statusDropdown.trigger.dispatchEvent(new dialog.KeyboardEvent("keydown", { key: "End", bubbles: true }));
-    statusDropdown.trigger.dispatchEvent(new dialog.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    check(ui.$("status").value === "missing" && statusDropdown.list.hidden && ui.$("results").children.length === 1, "Keyboard End and Enter choose the final status and apply its filter");
+    statusDropdown.popup.children[statusIndex].doCommand();
+    check(ui.$("status").value === "ambiguous" && ui.$("results").children.length === 1, "Native status command applies filter");
+    ui.showTab("catalogs");
+    check(ui.$("panel-papers").hidden && !ui.$("panel-catalogs").hidden, "Tabs separate literature and catalog tasks");
+    ui.showTab("help"); check(!ui.$("panel-help").hidden, "Help tab opens"); ui.showTab("papers");
+    check(dialog.document.querySelector("link").href.includes("v=0.1.4") && dialog.location.search.includes("v=0.1.4"), "Dialog and stylesheet use versioned cache keys");
+    check(dialog.getComputedStyle(dialog.document.querySelector("h1")).fontSize === "18px", "Current compact stylesheet loaded in Zotero");
     ui.$("status").value = ""; statusDropdown.sync(); ui.renderResults();
     ui.$("grade").value = "A类"; ui.renderResults();
     check(ui.$("results").children.length === 4, "Grade filter returns four expected matches");
@@ -146,6 +144,33 @@ async function runSmoke() {
     const qje = new Zotero.Item("journalArticle"); qje.setField("publicationTitle", "The Quarterly Journal of Economics");
     check(Zotero.ItemTreeManager.getCustomCellData(qje, app.columnKey) === "Top Tier", "QJE with leading The matches the catalog without ISSN");
     result.persistence = "Catalog restored after actual add-on disable/enable";
+    if (__OLD_PACKAGE__) {
+      const oldFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile); oldFile.initWithPath(__OLD_PACKAGE__);
+      const oldInstall = await AddonManager.getInstallForFile(oldFile); await oldInstall.install();
+      for (let i = 0; i < 80 && !Zotero.YourJournalList?.columnKey; i++) await delay(100);
+      let oldApp = Zotero.YourJournalList;
+      const oldDialog = oldApp.openManager(win);
+      for (let i = 0; i < 40 && !oldDialog.JournalListUI?.app; i++) await delay(100);
+      check(oldDialog.JournalListUI?.app, "Old version loaded with its UI and caches before upgrade");
+      const installedOld = await AddonManager.getAddonByID(oldApp.pluginID);
+      check(installedOld.version === "0.1.3", "Upgrade begins from installed v0.1.3");
+      const available = await new Promise((resolve, reject) => {
+        let found;
+        installedOld.findUpdates({ onUpdateAvailable(_addon, install) { found = install; }, onUpdateFinished(_addon, error) { if (error || !found) reject(new Error("No update discovered: " + error + " URL=" + installedOld.updateURL)); else resolve(found); } }, AddonManager.UPDATE_WHEN_USER_REQUESTED);
+      });
+      check(available.version === "0.1.4", "Zotero discovers newer version through JSON update feed");
+      await available.install();
+      for (let i = 0; i < 80 && Zotero.YourJournalList?.version !== "0.1.4"; i++) await delay(100);
+      app = Zotero.YourJournalList;
+      check(app.version === "0.1.4" && app.activeCatalog()?.name === "Annotated title regression", "Update downloads and installs XPI while preserving catalogs");
+      check(oldDialog.closed, "Upgrade closes the old UI");
+      const upgradedDialog = app.openManager(win);
+      for (let i = 0; i < 40 && !upgradedDialog.JournalListUI?.app; i++) await delay(100);
+      const upgradedUI = upgradedDialog.JournalListUI;
+      check(upgradedUI?.dropdowns.get("grade").control?.localName === "menulist", "Warm upgrade replaces cached custom menu with native control");
+      check(upgradedDialog.getComputedStyle(upgradedDialog.document.querySelector("h1")).fontSize === "18px", "Warm upgrade loads new stylesheet without clearing caches");
+      result.update = "v0.1.3 to v0.1.4 through local HTTP feed with SHA-256; GitHub production feed requires a published stable release";
+    }
     result.ok = true;
   }
   catch (error) { result.error = error.message + "\n" + error.stack; }

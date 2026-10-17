@@ -5,14 +5,12 @@ var JournalListUI = {
   $(id) { return document.getElementById(id); },
   async init() {
     [this.app, this.mainWindow] = window.arguments;
-    window.resizeTo(1060, 850);
+    window.resizeTo(1060, 760);
+    for (const button of document.querySelectorAll("[data-tab]")) button.addEventListener("click", () => this.showTab(button.dataset.tab));
     this.dropdowns = new Map([...document.querySelectorAll("select")].map(select => [select.id, new JournalListDropdown(select)]));
-    document.addEventListener("journal-list-dropdown-open", event => {
-      for (const [id, dropdown] of this.dropdowns) if (id !== event.detail) dropdown.close();
-    });
     const actions = {
       import: () => this.previewImport(), "confirm-import": () => this.confirmImport(),
-      "cancel-import": () => { this.pending = null; this.$("preview").hidden = true; },
+      "cancel-import": () => { this.pending = null; this.$("preview").hidden = true; this.$("catalog-browser").hidden = false; },
       export: async () => { if (await this.app.exportCatalog(window)) this.message("目录已导出，可分享给同学院的人。"); },
       delete: async () => {
         const cat = this.app.activeCatalog();
@@ -41,8 +39,13 @@ var JournalListUI = {
       for (const dropdown of this.dropdowns.values()) dropdown.destroy();
     }, { once: true });
     this.renderCatalogs();
+    this.showTab(this.app.activeCatalog() ? "papers" : "catalogs");
     this.captureItems();
     if (this.app.loadError) this.message(this.app.loadError, true);
+  },
+  showTab(name) {
+    for (const tab of ["papers", "catalogs", "help"]) this.$("panel-" + tab).hidden = tab !== name;
+    for (const button of document.querySelectorAll("[data-tab]")) button.setAttribute("aria-selected", String(button.dataset.tab === name));
   },
   async run(action) {
     if (this.busy) return;
@@ -95,6 +98,8 @@ var JournalListUI = {
     this.option(mode, "", "新增一份目录（保留现有目录）");
     for (const cat of this.app.state.catalogs) this.option(mode, cat.id, `替换：${cat.name} · ${cat.department} · ${cat.version}`);
     this.syncDropdowns();
+    this.showTab("catalogs");
+    this.$("catalog-browser").hidden = true;
     this.$("preview").hidden = false;
     this.$("preview").scrollIntoView({ behavior: "smooth", block: "start" });
   },
@@ -106,7 +111,7 @@ var JournalListUI = {
     const replaceId = this.$("import-mode").value;
     if (replaceId && !window.confirm("确定替换所选目录？建议先取消并导出旧目录留存。")) return;
     await this.app.importCatalog(cat, replaceId);
-    this.pending = null; this.$("preview").hidden = true;
+    this.pending = null; this.$("preview").hidden = true; this.$("catalog-browser").hidden = false;
     this.message(`已启用「${cat.name}」。在 Zotero 主列表表头右键勾选“学院等级”即可显示。`);
   },
   captureItems() {

@@ -8,6 +8,10 @@ import tempfile
 import time
 import zipfile
 import socket
+import threading
+from functools import partial
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+import hashlib
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,6 +41,7 @@ def main():
         'extensions.zotero.automaticScraperUpdates': False,
         'extensions.zotero.sync.autoSync': False,
         'extensions.logging.enabled': True,
+        'extensions.checkUpdateSecurity': False,  # Localhost update transport in disposable profile only
         'browser.dom.window.dump.enabled': True,
         'devtools.console.stdout.chrome': True,
         'devtools.console.stdout.content': True,
@@ -53,12 +58,34 @@ def main():
     source = source.replace('__FIXTURE_PATH__', json.dumps(str(ROOT / 'examples/demo-journals.json')))
     source = source.replace('__EXPORT_PATH__', json.dumps(str(profile / 'export.json')))
     source = source.replace('__CSV_PATH__', json.dumps(str(ROOT / 'examples/demo-journals.csv')))
-    (test_addon / 'bootstrap.js').write_text(source, encoding='utf-8')
     for addon_id, source_dir in [(plugin_id, ROOT / 'addon')]:
         with zipfile.ZipFile(stage / (addon_id + '.xpi'), 'w', zipfile.ZIP_DEFLATED) as archive:
             for file in source_dir.rglob('*'):
                 if file.is_file():
                     archive.write(file, file.relative_to(source_dir).as_posix())
+    # Local update feed is confined to this disposable test profile.
+    old_package = ROOT / 'dist/your-journal-list-0.1.3.xpi'
+    class QuietHandler(SimpleHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+    server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(stage)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    feed_url = f'http://127.0.0.1:{server.server_port}/updates.json'
+    manifest = json.loads((ROOT / 'addon/manifest.json').read_text(encoding='utf-8'))
+    package_file = stage / (plugin_id + '.xpi')
+    update = {'version': manifest['version'], 'update_link': f'http://127.0.0.1:{server.server_port}/{package_file.name}', 'update_hash': 'sha256:' + hashlib.sha256(package_file.read_bytes()).hexdigest(), 'applications': {'zotero': {k: manifest['applications']['zotero'][k] for k in ['strict_min_version', 'strict_max_version']}}}
+    (stage / 'updates.json').write_text(json.dumps({'addons': {plugin_id: {'updates': [update]}}}), encoding='utf-8')
+    if old_package.exists():
+        with zipfile.ZipFile(old_package) as old_zip, zipfile.ZipFile(stage / 'old.xpi', 'w', zipfile.ZIP_DEFLATED) as test_zip:
+            for entry in old_zip.infolist():
+                content = old_zip.read(entry.filename)
+                if entry.filename == 'manifest.json':
+                    old_manifest = json.loads(content)
+                    old_manifest['applications']['zotero']['update_url'] = feed_url
+                    content = json.dumps(old_manifest).encode()
+                test_zip.writestr(entry, content)
+    source = source.replace('__OLD_PACKAGE__', json.dumps(str(stage / 'old.xpi') if old_package.exists() else ''))
+    (test_addon / 'bootstrap.js').write_text(source, encoding='utf-8')
     startup = None
     if os.name == 'nt':
         startup = subprocess.STARTUPINFO()
@@ -147,6 +174,7 @@ def main():
             cleanup = "$taskProcesses = Get-CimInstance Win32_Process -Filter \"Name='zotero.exe'\"; $taskProcesses | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($env:JOURNAL_SMOKE_PROFILE) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }"
             subprocess.run(['powershell', '-NoProfile', '-Command', cleanup], env={**os.environ, 'JOURNAL_SMOKE_PROFILE': str(profile)}, capture_output=True)
         log.close()
+        server.shutdown()
 
 
 if __name__ == '__main__':

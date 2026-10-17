@@ -1,7 +1,7 @@
 /* global Zotero, Services, ChromeUtils, Cc, Ci, APP_SHUTDOWN */
 var chromeHandle, journalScope;
 
-async function startup({ id, rootURI }) {
+async function startup({ id, rootURI, version }) {
   await Zotero.initializationPromise;
   if (typeof IOUtils === "undefined") Cu.importGlobalProperties(["IOUtils"]);
   if (typeof PathUtils === "undefined") Cu.importGlobalProperties(["PathUtils"]);
@@ -10,10 +10,10 @@ async function startup({ id, rootURI }) {
     ["content", "yourjournallist", "content/"]
   ]);
   journalScope = { Zotero, Services, ChromeUtils, IOUtils, PathUtils, Cc, Ci };
-  Services.scriptloader.loadSubScript(rootURI + "content/core.js", journalScope, "UTF-8");
-  Services.scriptloader.loadSubScript(rootURI + "content/app.js", journalScope, "UTF-8");
+  Services.scriptloader.loadSubScriptWithOptions(rootURI + "content/core.js", { target: journalScope, charset: "UTF-8", ignoreCache: true });
+  Services.scriptloader.loadSubScriptWithOptions(rootURI + "content/app.js", { target: journalScope, charset: "UTF-8", ignoreCache: true });
   Zotero.YourJournalList = journalScope.JournalListApp;
-  await Zotero.YourJournalList.start(id);
+  await Zotero.YourJournalList.start(id, version);
   for (const win of Zotero.getMainWindows()) Zotero.YourJournalList.attachWindow(win);
 }
 

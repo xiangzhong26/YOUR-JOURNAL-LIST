@@ -1,0 +1,30 @@
+name: Verify published update feed
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify public latest assets and SHA-256
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if [ -n "$RELEASE_TAG" ]; then
+              python scripts/verify_release.py --live --expect-version "${RELEASE_TAG#v}" && exit 0
+            else
+              python scripts/verify_release.py --live && exit 0
+            fi
+            sleep 10
+          done
+          exit 1
