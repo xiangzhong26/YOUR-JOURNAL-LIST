@@ -181,9 +181,15 @@ var JournalListApp = {
     await IOUtils.writeJSON(path, exported, { tmpPath: path + ".tmp" });
     return true;
   },
-  async copyPrompt(language = "zh-CN") {
+  async readPrompt(language = "zh-CN") {
     const filename = language === "en" ? "ai-prompt-en.txt" : "ai-prompt.txt";
-    const prompt = await Zotero.File.getContentsAsync(`chrome://yourjournallist/content/${filename}`);
+    const response = await Zotero.HTTP.request("GET", `chrome://yourjournallist/content/${filename}`, { responseType: "text" });
+    const prompt = response.responseText;
+    if (typeof prompt !== "string" || !prompt.trim()) throw new Error("提示词文件未返回有效文本，请重新安装插件后再试。");
+    return prompt;
+  },
+  async copyPrompt(language = "zh-CN") {
+    const prompt = await this.readPrompt(language);
     Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper).copyString(prompt);
   },
   async stop() {

@@ -22,7 +22,7 @@
 
 ### 1. 下载并安装插件
 
-1. 打开 [GitHub Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases)，选择相应版本，下载 Assets 中的 `your-journal-list-0.1.0.xpi`（之后版本文件名会变化）。**不要把 Source code ZIP 当成安装包。** 尚未发布时，可按下方开发步骤在本地构建。
+1. 打开 [GitHub Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases)，选择相应版本，下载 Assets 中的 `your-journal-list-0.1.1.xpi`（之后版本文件名会变化）。**不要把 Source code ZIP 当成安装包。** 尚未发布时，可按下方开发步骤在本地构建。
 2. 打开 Zotero，进入 **工具 → 插件**（英文界面为 **Tools → Plugins**，部分版本名称可能不同）。
 3. 点击插件管理页面的齿轮菜单，选择 **从文件安装插件 / Install Plugin From File…**，找到下载的 `.xpi` 并完成安装。
 4. 回到文献库，点击文献列表工具栏的 **学院等级 · 导入目录**；也可从 **工具 → 学院期刊目录 / Your Journal List** 打开。
@@ -181,11 +181,11 @@ npm test
 npm run build
 ```
 
-产物：`dist/your-journal-list-0.1.0.xpi`、`.xpi.sha256` 和 `updates.json`。只构建可运行 `python scripts/build.py`。Windows / Zotero 10 的隔离集成测试可运行 `python scripts/smoke_zotero.py`；它使用新的临时资料库，不在日常资料库安装插件。
+产物：`dist/your-journal-list-0.1.1.xpi`、`.xpi.sha256` 和 `updates.json`。只构建可运行 `python scripts/build.py`。Windows / Zotero 10 的隔离集成测试可运行 `python scripts/smoke_zotero.py`；它使用新的临时资料库，不在日常资料库安装插件。
 
-已有 16 项自动化测试；真机集成验证基线见 [测试报告](docs/test-report.json)。发布前还应人工检查文件选择器、重启和视觉布局。
+已有 18 项自动化测试；真机集成验证基线见 [测试报告](docs/test-report.json)。发布前还应人工检查文件选择器、重启和视觉布局。
 
-代码提交到 GitHub 后，Actions 会检查和构建。发布版本时同时更新两个版本文件，提交并推送 `v0.1.0` 标签；工作流创建发布草稿，附加上述三份产物，检查后再公开。初次开源建议先发布预发布版。详细命令与步骤见 [测试说明](docs/TESTING.md)、[GitHub 发布说明](docs/RELEASING.md)、[贡献指南](CONTRIBUTING.md)。
+代码提交到 GitHub 后，Actions 会检查和构建。发布版本时同时更新两个版本文件，提交并推送 `v0.1.1` 标签；工作流创建发布草稿，附加上述三份产物，检查后再公开。初次开源建议先发布预发布版。详细命令与步骤见 [测试说明](docs/TESTING.md)、[GitHub 发布说明](docs/RELEASING.md)、[贡献指南](CONTRIBUTING.md)。
 
 代码采用 [MIT](LICENSE) 许可证；真实学院目录的分享权限由提供者确认，仓库只包含演示数据。`main.py` / `pyproject.toml` 是原始初始化文件，插件运行不依赖它们。
 

@@ -2,6 +2,8 @@
   "ok": true,
   "checks": [
     "Plugin startup and custom column registration",
+    "Chinese prompt loads as UTF-8 text from installed XPI",
+    "English prompt loads as text from installed XPI",
     "Main library window available",
     "Toolbar entry attached",
     "JSON import validates conflicting aliases",
@@ -37,5 +39,6 @@
   "error": "",
   "persistence": "Catalog restored after actual add-on disable/enable",
   "testedAt": "2026-10-17",
-  "platform": "Windows"
+  "platform": "Windows",
+  "pluginVersion": "0.1.1"
 }

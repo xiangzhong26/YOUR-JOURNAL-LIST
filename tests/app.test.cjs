@@ -28,7 +28,7 @@ function setup(saved, writeError = false) {
     }
   });
   vm.runInContext(source, context);
-  return { app: context.JournalListApp, writes: () => writes, disk: () => disk };
+  return { app: context.JournalListApp, context, writes: () => writes, disk: () => disk };
 }
 const catalog = name => ({ name, journals: [{ title: 'Example', grade: 'A' }] });
 
@@ -64,4 +64,45 @@ test('invalid replacement cannot remove or alter an existing catalog', async () 
   await assert.rejects(app.importCatalog(catalog('Replacement'), 'missing-id'), /不存在/);
   assert.equal(app.activeCatalog().name, 'Original');
   assert.equal(writes(), 1);
+});
+
+test('Chinese and English copy buttons copy response text rather than an XMLHttpRequest object', async () => {
+  const { app, context } = setup();
+  const copied = [], requested = [];
+  const prompts = {
+    'ai-prompt.txt': fs.readFileSync(path.join(__dirname, '../addon/content/ai-prompt.txt'), 'utf8'),
+    'ai-prompt-en.txt': fs.readFileSync(path.join(__dirname, '../addon/content/ai-prompt-en.txt'), 'utf8')
+  };
+  const request = async (method, uri, options) => {
+    assert.equal(method, 'GET');
+    assert.equal(options.responseType, 'text');
+    const filename = uri.split('/').at(-1);
+    requested.push(filename);
+    return { responseText: prompts[filename], toString: () => '[object XMLHttpRequest]' };
+  };
+  context.Zotero.HTTP = { request };
+  // Reproduce the old API behavior so the original implementation cannot pass this test.
+  context.Zotero.File = { getContentsAsync: async () => ({ toString: () => '[object XMLHttpRequest]' }) };
+  context.Ci = { nsIClipboardHelper: 'clipboard' };
+  context.Cc = { '@mozilla.org/widget/clipboardhelper;1': { getService: () => ({ copyString: value => {
+    assert.equal(typeof value, 'string'); copied.push(value);
+  } }) } };
+  await app.copyPrompt();
+  await app.copyPrompt('en');
+  assert.deepEqual(requested, ['ai-prompt.txt', 'ai-prompt-en.txt']);
+  assert.deepEqual(copied, [prompts['ai-prompt.txt'], prompts['ai-prompt-en.txt']]);
+});
+
+test('failed or non-text prompt reads do not overwrite the clipboard', async () => {
+  const { app, context } = setup();
+  let clipboardWrites = 0;
+  context.Ci = { nsIClipboardHelper: 'clipboard' };
+  context.Cc = { '@mozilla.org/widget/clipboardhelper;1': { getService: () => ({ copyString: () => clipboardWrites++ }) } };
+  for (const responseText of [undefined, {}, '', '   ']) {
+    context.Zotero.HTTP = { request: async () => ({ responseText }) };
+    await assert.rejects(app.copyPrompt(), /有效文本/);
+  }
+  context.Zotero.HTTP.request = async () => { throw new Error('Resource unavailable'); };
+  await assert.rejects(app.copyPrompt('en'), /Resource unavailable/);
+  assert.equal(clipboardWrites, 0);
 });

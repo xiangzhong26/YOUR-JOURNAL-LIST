@@ -22,7 +22,7 @@ All five images below are **operation illustrations, not application screenshots
 
 ### 1. Download, install, and open
 
-1. Open [GitHub Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) and download the `.xpi` asset, such as `your-journal-list-0.1.0.xpi`. **Source code ZIP is not the installable plugin.** If no release has been published, build locally using the developer instructions below.
+1. Open [GitHub Releases](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) and download the `.xpi` asset, such as `your-journal-list-0.1.1.xpi`. **Source code ZIP is not the installable plugin.** If no release has been published, build locally using the developer instructions below.
 2. In Zotero, open **Tools → Plugins** (Chinese: **工具 → 插件**; wording can vary by version).
 3. Open the gear menu and choose **Install Plugin From File…**, select the downloaded `.xpi`, and finish installation.
 4. Return to the library and click **学院等级 · 导入目录** (Institutional grade · Import catalog) in the item-list toolbar. Alternatively, open **Tools → 学院期刊目录 / Your Journal List**.
@@ -187,9 +187,9 @@ npm test
 npm run build
 ```
 
-Outputs: `dist/your-journal-list-0.1.0.xpi`, `.xpi.sha256`, and `updates.json`. To build only, run `python scripts/build.py`. On Windows / Zotero 10, `python scripts/smoke_zotero.py` runs integration checks in a new disposable profile; it does not install into your everyday profile.
+Outputs: `dist/your-journal-list-0.1.1.xpi`, `.xpi.sha256`, and `updates.json`. To build only, run `python scripts/build.py`. On Windows / Zotero 10, `python scripts/smoke_zotero.py` runs integration checks in a new disposable profile; it does not install into your everyday profile.
 
-There are 16 unit tests. The runtime-validation baseline is recorded in [test-report.json](docs/test-report.json). Before releasing, also check the native file dialogs, a complete restart, and visual layout manually.
+There are 18 unit tests. The runtime-validation baseline is recorded in [test-report.json](docs/test-report.json). Before releasing, also check the native file dialogs, a complete restart, and visual layout manually.
 
 To publish the first version after review:
 
@@ -197,8 +197,8 @@ To publish the first version after review:
 git add .
 git commit -m "Add journal list plugin and bilingual illustrated guides"
 git push -u origin HEAD
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 For later releases, first update both `package.json` and `addon/manifest.json` and use a new matching tag. GitHub Actions checks the code, runs tests, builds the package, and creates a **draft release** with all three assets. Review the draft and publish it; a prerelease is recommended for initial testing. A private repository must be made public if you want unrestricted open-source access. Do not include personal Zotero libraries or restricted institutional documents. See the extended [release guide](docs/RELEASING.md) and [contribution guide](CONTRIBUTING.md), currently in Chinese.

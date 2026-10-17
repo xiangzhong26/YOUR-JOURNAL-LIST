@@ -22,6 +22,10 @@ async function runSmoke() {
       await delay(500);
     }
     check(app?.columnKey, "Plugin startup and custom column registration");
+    const chinesePrompt = await app.readPrompt();
+    const englishPrompt = await app.readPrompt("en");
+    check(typeof chinesePrompt === "string" && chinesePrompt.startsWith("请根据") && chinesePrompt.includes('"schemaVersion": 1'), "Chinese prompt loads as UTF-8 text from installed XPI");
+    check(typeof englishPrompt === "string" && englishPrompt.startsWith("Using the school") && englishPrompt.includes('"schemaVersion": 1'), "English prompt loads as text from installed XPI");
     check(win?.ZoteroPane?.itemsView, "Main library window available");
     app.attachWindow(win);
     check(win.document.getElementById("your-journal-list-button"), "Toolbar entry attached");

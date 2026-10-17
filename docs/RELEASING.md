@@ -19,21 +19,21 @@ git push -u origin HEAD
 
 ## 发布第一个版本
 
-首版版本号为 `0.1.0`。本地确认构建与测试：
+首版版本号为 `0.1.1`。本地确认构建与测试：
 
 ```powershell
 npm run check
 npm test
 npm run build
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 推送标签后，`Release plugin` 工作流会再次检查并创建 **Draft Release（发布草稿）**，自动附加 `.xpi`、`.sha256` 和 `updates.json` 文件。
 
 进入 GitHub → Releases → 编辑草稿：
 
-- 标题：`Your Journal List v0.1.0`。
+- 标题：`Your Journal List v0.1.1`。
 - 说明已实现的功能、实际测试的 Zotero/系统版本、安装方法和已知限制。
 - 建议首版勾选 **Set as a pre-release**，让少量同学先试用。
 - 检查附件完整，然后点击 **Publish release** 正式公开。
@@ -42,9 +42,9 @@ git push origin v0.1.0
 
 ## 之后更新
 
-1. 同时更新 `package.json`、`addon/manifest.json` 版本，如 `0.1.1`，并填写 CHANGELOG。
+1. 同时更新 `package.json`、`addon/manifest.json` 版本，如 `0.1.2`，并填写 CHANGELOG。
 2. 完成测试，提交并推送代码。
-3. 创建并推送同名版本标签 `v0.1.1`。已发布标签不要覆盖；修复问题使用新版本号。
+3. 创建并推送同名版本标签 `v0.1.2`。已发布标签不要覆盖；修复问题使用新版本号。
 4. 检查新的发布草稿、上传产物和兼容范围后公开。
 
 GitHub 工作流能检查纯逻辑和打包，不能替代 Zotero 真机验收。manifest 允许安装的范围不代表每个平台都实测。
