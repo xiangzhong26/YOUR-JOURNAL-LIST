@@ -1,6 +1,6 @@
 # Your Journal List
 
-[中文](README.md) · [Download](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) · [Publishing and updates](docs/PUBLISHING.en.md)
+[中文](README.md) · [Download v0.1.5 XPI](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases/download/v0.1.5/your-journal-list-0.1.5.xpi) · [Publishing and updates](docs/PUBLISHING.en.md)
 
 Import your institution's journal rankings into Zotero, display grades beside papers, and filter the current collection by grade.
 

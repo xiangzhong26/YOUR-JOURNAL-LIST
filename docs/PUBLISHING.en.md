@@ -10,6 +10,8 @@ As checked on 2026-10-17, [Zotero's official documentation](https://www.zotero.o
 
 ## First stable release: v0.1.5
 
+**Current status: v0.1.5 is publicly released; public asset downloads and SHA-256 validation passed.** The steps below document the release process. Do not recreate the existing v0.1.5 tag; use a new version for later releases.
+
 Install `dist/your-journal-list-0.1.5.xpi` locally and check import, the grade column, native menus and filtering. Then, as repository maintainer:
 
 1. Enable repository **Actions**. The release workflow declares `contents: write` and needs permission to create releases.
@@ -67,7 +69,7 @@ Zotero checks the manifest, discovers a newer compatible version, downloads and 
 
 Requirements: public repository and release; higher compatible version; stable release marked latest; matching assets from the same build; network access to GitHub and its download domains. Drafts, pre-releases, source pushes and tags alone do not activate this channel.
 
-**Test scope:** isolated Zotero 10.0.6 successfully discovered, downloaded, hash-checked and installed v0.1.5 over a v0.1.4 test copy, preserving catalogs and replacing warm UI caches. Only the old test copy's update URL was redirected to localhost, with HTTP allowed in the disposable profile. Production packages use HTTPS. The public GitHub chain must be verified with `--live` after publication; it is not claimed to be live yet.
+**Test scope:** isolated Zotero 10.0.6 successfully discovered, downloaded, hash-checked and installed v0.1.5 over a v0.1.4 test copy, preserving catalogs and replacing warm UI caches. Only the old test copy's update URL was redirected to localhost, with HTTP allowed in the disposable profile. Production packages use HTTPS. The public GitHub chain has now passed `--live --expect-version 0.1.5`. Repeat the public check for each later release.
 
 | Failure | Check |
 | --- | --- |

@@ -1,6 +1,6 @@
 # Your Journal List · 学院期刊目录
 
-[English](README.en.md) · [下载安装包](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases) · [发布与自动更新](docs/PUBLISHING.md)
+[English](README.en.md) · [下载 v0.1.5 安装包](https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases/download/v0.1.5/your-journal-list-0.1.5.xpi) · [发布与自动更新](docs/PUBLISHING.md)
 
 把学校或学院的期刊目录导入 Zotero，在文献列表中查看等级，并按等级筛选当前集合。
 

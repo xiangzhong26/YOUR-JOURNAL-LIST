@@ -11,6 +11,8 @@
 
 ## 第一次发布 v0.1.5
 
+**当前状态：v0.1.5 已正式公开发布，安装包与更新清单已通过公开下载和 SHA-256 校验。** 下列步骤保留为发布流程参考，请勿重复创建已存在的 v0.1.5 标签；后续版本使用新的版本号。
+
 先在 Zotero 安装本地 `dist/your-journal-list-0.1.5.xpi`，确认导入、等级列、原生下拉和筛选正常。下列操作由仓库维护者执行：
 
 1. 在 GitHub 仓库的 **Actions** 页面确认工作流已启用。仓库需要允许 Actions 创建 Release（本项目工作流已声明 `contents: write`）。
@@ -68,7 +70,7 @@ https://github.com/xiangzhong26/YOUR-JOURNAL-LIST/releases/latest/download/updat
 
 正式更新成立的条件：仓库和 Release 公开；新版本比已安装版本高；正式 Release 被设为最新版本；3 个资产完整且相互一致；用户可以访问 GitHub 及其下载域名。Draft、pre-release、只推送代码、只创建标签都不能替代正式 Release。
 
-**验证范围：** 已在隔离 Zotero 10.0.6 中，从 v0.1.4 的测试副本通过本地 HTTP 更新清单完成发现、下载、SHA-256 校验和 v0.1.5 安装，并保留目录、刷新旧缓存。测试副本仅将旧包的更新源改为 localhost，临时配置允许 HTTP；正式安装包仍使用 HTTPS。GitHub 公开链路需发布后运行 `--live` 验证，当前不宣称已上线。
+**验证范围：** 已在隔离 Zotero 10.0.6 中，从 v0.1.4 的测试副本通过本地 HTTP 更新清单完成发现、下载、SHA-256 校验和 v0.1.5 安装，并保留目录、刷新旧缓存。测试副本仅将旧包的更新源改为 localhost，临时配置允许 HTTP；正式安装包仍使用 HTTPS。GitHub 公开链路现已通过 `--live --expect-version 0.1.5` 校验。以后每次发布仍应重新运行线上校验。
 
 ### 更新异常排查
 
