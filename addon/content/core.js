@@ -10,9 +10,12 @@
   const unique = values => [...new Set(values)];
 
   function normalizeName(value) {
-    return text(value).normalize("NFKC").toLowerCase()
+    const normalized = text(value).normalize("NFKC").toLowerCase()
       .replace(/[\u2018\u2019]/g, "'").replace(/[\u2010-\u2015]/g, "-")
       .replace(/\s*&\s*/g, "&").replace(/\s+/gu, " ");
+    // Known list-membership suffixes are annotations, not part of a journal's title.
+    // Preserve all other parenthetical text (editions, disciplines, places, etc.).
+    return normalized.replace(/(?:\s*\((?:ut[\s-]*dallas\s*24|ft\s*50)\))+\s*$/u, "").trim() || normalized;
   }
 
   function normalizeISSN(value) {
@@ -152,7 +155,7 @@
     const index = buildIndex(catalog);
     for (const [kind, map] of [["刊名/别名", index.names], ["ISSN", index.issns]]) {
       for (const [key, entries] of map) {
-        if (entries.size > 1) warnings.push(`${kind} 冲突：${key} → ${[...entries].map(e => `${e.title} (${e.grade}${e.subject ? " / " + e.subject : ""})`).join("；")}。匹配时将显示待确认。`);
+        if (entries.size > 1 && !sameJournalAndGrade(entries)) warnings.push(`${kind} 冲突：${key} → ${[...entries].map(e => `${e.title} (${e.grade}${e.subject ? " / " + e.subject : ""})`).join("；")}。匹配时将显示待确认。`);
       }
     }
     return { catalog, warnings, originalCount: raw.journals.length };
@@ -184,6 +187,11 @@
     return { names, issns };
   }
 
+  function sameJournalAndGrade(entries) {
+    const records = [...entries];
+    return records.length > 0 && records.every(e => normalizeName(e.title) === normalizeName(records[0].title) && e.grade === records[0].grade);
+  }
+
   function matchJournal(index, item) {
     if (!index) return { status: "no-catalog", grade: "", entries: [] };
     const idCandidates = new Set(), nameCandidates = new Set();
@@ -195,14 +203,14 @@
     let candidates, method;
     if (idCandidates.size) {
       // A unique ISSN may disambiguate a shared alias, but conflicting explicit names fail closed.
-      if (idCandidates.size === 1 && nameCandidates.size && !nameCandidates.has([...idCandidates][0])) {
+      if (sameJournalAndGrade(idCandidates) && nameCandidates.size && ![...idCandidates].some(e => nameCandidates.has(e))) {
         return { status: "ambiguous", grade: "", method: "ISSN 与刊名冲突", entries: unique([...idCandidates, ...nameCandidates]) };
       }
       candidates = idCandidates; method = "ISSN";
     }
     else { candidates = nameCandidates; method = "刊名 / 已确认别名"; }
+    if (sameJournalAndGrade(candidates)) return { status: "matched", grade: [...candidates][0].grade, method, entries: [...candidates] };
     if (candidates.size > 1) return { status: "ambiguous", grade: "", method, entries: [...candidates] };
-    if (candidates.size === 1) return { status: "matched", grade: [...candidates][0].grade, method, entries: [...candidates] };
     const hasMetadata = ids.length || text(item.title) || text(item.abbreviation);
     return { status: hasMetadata ? "unlisted" : "missing", grade: "", entries: [] };
   }

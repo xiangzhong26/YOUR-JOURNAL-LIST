@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Your Journal List · 学院期刊目录",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "导入学院期刊目录，在 Zotero 中显示期刊等级并按等级筛选。数据仅保存在本地。",
   "author": "xiangzhong26",
   "homepage_url": "https://github.com/xiangzhong26/YOUR-JOURNAL-LIST",

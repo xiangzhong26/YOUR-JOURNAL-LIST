@@ -15,6 +15,46 @@ test('format normalization does not erase meaningful punctuation or invent alias
   assert.notEqual(core.normalizeName('A-B'), core.normalizeName('AB'));
   assert.equal(match({ title: 'Journal Example Studies' }).status, 'unlisted');
 });
+
+test('ranking membership suffixes do not hide journals with ordinary titles or missing ISSNs', () => {
+  const { catalog } = core.validateCatalog({ journals: [
+    { title: 'Strategic Management Journal (UT-Dallas 24)', aliases: ['Strategic Management Journal (UT-Dallas 24) (FT 50)'], grade: 'Tier 1' },
+    { title: 'Organization Science (UT-Dallas 24)', grade: 'Tier 1' },
+    { title: 'Information Systems Research(UT-Dallas 24)(FT 50)', grade: 'Tier 1' }
+  ] });
+  const index = core.buildIndex(catalog);
+  for (const title of ['Strategic Management Journal', 'Organization Science', 'Information Systems Research', 'Strategic Management Journal（UT-Dallas 24）（FT50）']) {
+    assert.equal(core.matchJournal(index, { title }).grade, 'Tier 1', title);
+  }
+  assert.notEqual(core.normalizeName('Journal (English Edition)'), core.normalizeName('Journal'));
+  assert.notEqual(core.normalizeName('Journal (1997)'), core.normalizeName('Journal'));
+  assert.notEqual(core.normalizeName('Journal (FT 500)'), core.normalizeName('Journal'));
+});
+
+test('one journal with the same grade in multiple subjects is matched with all evidence preserved', () => {
+  const { catalog, warnings } = core.validateCatalog({ journals: [
+    { title: 'R & D Management', issn: ['0033-6807'], grade: 'Tier 3', subject: 'Strategy' },
+    { title: 'R&D MANAGEMENT', issn: ['0033-6807'], grade: 'Tier 3', subject: 'Operations' }
+  ] });
+  const index = core.buildIndex(catalog);
+  for (const item of [{ title: 'R&D Management' }, { issn: '0033-6807' }, { title: 'R & D Management', issn: '0033-6807' }]) {
+    const result = core.matchJournal(index, item);
+    assert.equal(result.status, 'matched'); assert.equal(result.grade, 'Tier 3');
+    assert.equal(result.entries.length, 2);
+  }
+  assert.equal(warnings.length, 0);
+  catalog.journals[1].grade = 'Tier 2';
+  assert.equal(core.matchJournal(core.buildIndex(catalog), { title: 'R&D Management' }).status, 'ambiguous');
+});
+
+test('multi-subject ISSN evidence does not override a contradictory explicit journal name', () => {
+  const { catalog } = core.validateCatalog({ journals: [
+    { title: 'R&D Management', issn: ['0033-6807'], grade: 'Tier 3', subject: 'Strategy' },
+    { title: 'R&D Management', issn: ['0033-6807'], grade: 'Tier 3', subject: 'Operations' },
+    { title: 'Another Journal', grade: 'Tier 3' }
+  ] });
+  assert.equal(core.matchJournal(core.buildIndex(catalog), { title: 'Another Journal', issn: '0033-6807' }).status, 'ambiguous');
+});
 test('abbreviations and valid ISSNs identify journals', () => {
   assert.equal(match({ abbreviation: 'J. Example Stud.' }).grade, 'B类');
   assert.equal(match({ issn: '14679310' }).grade, 'A类');
@@ -49,7 +89,7 @@ test('CSV rejects broken quoting, duplicate headers, unequal columns and mixed i
     assert.throws(() => core.parseCatalog(csv, 'bad.csv'));
   }
 });
-test('identical canonical title/grade/subject rows merge; differing grades or subjects stay ambiguous', () => {
+test('identical canonical title/grade/subject rows merge; differing grades stay ambiguous', () => {
   const { catalog, warnings } = core.validateCatalog({ journals: [
     { title: 'Example', grade: 'A', aliases: ['First'] },
     { title: 'EXAMPLE', grade: 'A', aliases: ['Second'] },

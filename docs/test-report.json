@@ -33,12 +33,17 @@
     "Deleting active catalog falls back to remaining catalog",
     "Disable cleanup removes toolbar, dialogs and column",
     "Re-enable reloads persisted catalog and registers column",
-    "Grade works after re-enable"
+    "Grade works after re-enable",
+    "Annotated/multi-subject column regression: Strategic Management Journal",
+    "Annotated/multi-subject column regression: Organization Science",
+    "Annotated/multi-subject column regression: R&D Management",
+    "Multi-subject matching preserves both evidence records",
+    "Annotated/multi-subject column regression: Management Science"
   ],
   "version": "10.0.6",
   "error": "",
   "persistence": "Catalog restored after actual add-on disable/enable",
   "testedAt": "2026-10-17",
   "platform": "Windows",
-  "pluginVersion": "0.1.1"
+  "pluginVersion": "0.1.2"
 }

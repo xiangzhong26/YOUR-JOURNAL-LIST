@@ -103,6 +103,20 @@ async function runSmoke() {
     }
     check(app?.activeCatalog()?.name === "Second test catalog" && app.columnKey, "Re-enable reloads persisted catalog and registers column");
     check(Zotero.ItemTreeManager.getCustomCellData(items[0], app.columnKey) === "A类", "Grade works after re-enable");
+    // Synthetic records reproduce annotated titles and repeated subject entries without publishing user data.
+    await app.importCatalog({ name: "Annotated title regression", journals: [
+      { title: "Strategic Management Journal (UT-Dallas 24)", grade: "Tier 1" },
+      { title: "Organization Science (UT-Dallas 24) (FT 50)", grade: "Tier 1" },
+      { title: "R & D Management", grade: "Tier 3", subject: "Strategy", issn: ["0033-6807"] },
+      { title: "R & D Management", grade: "Tier 3", subject: "Operations", issn: ["0033-6807"] },
+      { title: "Management Science", grade: "Tier 1" }
+    ] });
+    for (const [title, grade] of [["Strategic Management Journal", "Tier 1"], ["Organization Science", "Tier 1"], ["R&D Management", "Tier 3"], ["Management Science", "Tier 1"]]) {
+      const article = new Zotero.Item("journalArticle");
+      article.setField("publicationTitle", title);
+      check(Zotero.ItemTreeManager.getCustomCellData(article, app.columnKey) === grade, "Annotated/multi-subject column regression: " + title);
+      if (title === "R&D Management") check(app.match(article).entries.length === 2, "Multi-subject matching preserves both evidence records");
+    }
     result.persistence = "Catalog restored after actual add-on disable/enable";
     result.ok = true;
   }
